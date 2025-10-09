@@ -10,51 +10,51 @@ namespace Mirror.Examples.MultipleMatch
     public class CanvasController : MonoBehaviour
     {
         /// <summary>
-        /// Match Controllers listen for this to terminate their match and clean up
+        /// 매치 컨트롤러는 이 이벤트를 수신하여 매치를 종료하고 정리합니다.
         /// </summary>
         public event Action<NetworkConnectionToClient> OnPlayerDisconnect;
 
         /// <summary>
-        /// Cross-reference of client that created the corresponding match in openMatches below
+        /// 아래 openMatches의 해당 매치를 생성한 클라이언트의 상호 참조입니다.
         /// </summary>
         internal static readonly Dictionary<NetworkConnectionToClient, Guid> playerMatches = new Dictionary<NetworkConnectionToClient, Guid>();
 
         /// <summary>
-        /// Open matches that are available for joining
+        /// 참여 가능한 공개 매치입니다.
         /// </summary>
         internal static readonly Dictionary<Guid, MatchInfo> openMatches = new Dictionary<Guid, MatchInfo>();
 
         /// <summary>
-        /// Network Connections of all players in a match
+        /// 한 매치에 있는 모든 플레이어의 네트워크 연결입니다.
         /// </summary>
         internal static readonly Dictionary<Guid, HashSet<NetworkConnectionToClient>> matchConnections = new Dictionary<Guid, HashSet<NetworkConnectionToClient>>();
 
         /// <summary>
-        /// Player informations by Network Connection
+        /// 네트워크 연결별 플레이어 정보입니다.
         /// </summary>
         internal static readonly Dictionary<NetworkConnectionToClient, PlayerInfo> playerInfos = new Dictionary<NetworkConnectionToClient, PlayerInfo>();
 
         /// <summary>
-        /// Network Connections that have neither started nor joined a match yet
+        /// 아직 매치를 시작하거나 참여하지 않은 네트워크 연결입니다.
         /// </summary>
         internal static readonly List<NetworkConnectionToClient> waitingConnections = new List<NetworkConnectionToClient>();
 
         /// <summary>
-        /// GUID of a match the local player has created
+        /// 로컬 플레이어가 생성한 매치의 GUID입니다.
         /// </summary>
         internal Guid localPlayerMatch = Guid.Empty;
 
         /// <summary>
-        /// GUID of a match the local player has joined
+        /// 로컬 플레이어가 참여한 매치의 GUID입니다.
         /// </summary>
         internal Guid localJoinedMatch = Guid.Empty;
 
         /// <summary>
-        /// GUID of a match the local player has selected in the Toggle Group match list
+        /// 로컬 플레이어가 토글 그룹 매치 목록에서 선택한 매치의 GUID입니다.
         /// </summary>
         internal Guid selectedMatch = Guid.Empty;
 
-        // Used in UI for "Player #"
+        // "Player #" UI에 사용됩니다.
         int playerIndex = 1;
 
         [Header("GUI References")]
@@ -68,7 +68,7 @@ namespace Mirror.Examples.MultipleMatch
         public RoomGUI roomGUI;
         public ToggleGroup toggleGroup;
 
-        // RuntimeInitializeOnLoadMethod -> fast playmode without domain reload
+        // RuntimeInitializeOnLoadMethod -> 도메인 리로드 없이 빠른 플레이 모드
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void ResetStatics()
         {
@@ -79,9 +79,9 @@ namespace Mirror.Examples.MultipleMatch
             waitingConnections.Clear();
         }
 
-        #region UI Functions
+        #region UI 기능
 
-        // Called from several places to ensure a clean reset
+        // 여러 곳에서 호출되어 깨끗한 리셋을 보장합니다.
         //  - MatchNetworkManager.Awake
         //  - OnStartServer
         //  - OnStartClient
@@ -97,7 +97,7 @@ namespace Mirror.Examples.MultipleMatch
             localJoinedMatch = Guid.Empty;
         }
 
-        // Called from OnStopServer and OnStopClient when shutting down
+        // 종료 시 OnStopServer 및 OnStopClient에서 호출됩니다.
         void ResetCanvas()
         {
             InitializeData();
@@ -108,10 +108,10 @@ namespace Mirror.Examples.MultipleMatch
 
         #endregion
 
-        #region Button Calls
+        #region 버튼 호출
 
         /// <summary>
-        /// Called from <see cref="MatchGUI.OnToggleClicked"/>
+        /// <see cref="MatchGUI.OnToggleClicked"/>에서 호출됩니다.
         /// </summary>
         /// <param name="matchId"></param>
         [ClientCallback]
@@ -137,7 +137,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Assigned in inspector to Create button
+        /// 인스펙터에서 생성 버튼에 할당됩니다.
         /// </summary>
         [ClientCallback]
         public void RequestCreateMatch()
@@ -146,7 +146,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Assigned in inspector to Cancel button
+        /// 인스펙터에서 취소 버튼에 할당됩니다.
         /// </summary>
         [ClientCallback]
         public void RequestCancelMatch()
@@ -157,7 +157,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Assigned in inspector to Join button
+        /// 인스펙터에서 참여 버튼에 할당됩니다.
         /// </summary>
         [ClientCallback]
         public void RequestJoinMatch()
@@ -168,7 +168,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Assigned in inspector to Leave button
+        /// 인스펙터에서 나가기 버튼에 할당됩니다.
         /// </summary>
         [ClientCallback]
         public void RequestLeaveMatch()
@@ -179,7 +179,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Assigned in inspector to Ready button
+        /// 인스펙터에서 준비 버튼에 할당됩니다.
         /// </summary>
         [ClientCallback]
         public void RequestReadyChange()
@@ -192,7 +192,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Assigned in inspector to Start button
+        /// 인스펙터에서 시작 버튼에 할당됩니다.
         /// </summary>
         [ClientCallback]
         public void RequestStartMatch()
@@ -203,7 +203,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Called from <see cref="MatchController.RpcExitGame"/>
+        /// <see cref="MatchController.RpcExitGame"/>에서 호출됩니다.
         /// </summary>
         [ClientCallback]
         public void OnMatchEnded()
@@ -215,9 +215,9 @@ namespace Mirror.Examples.MultipleMatch
 
         #endregion
 
-        #region Server & Client Callbacks
+        #region 서버 및 클라이언트 콜백
 
-        // Methods in this section are called from MatchNetworkManager's corresponding methods
+        // 이 섹션의 메서드는 MatchNetworkManager의 해당 메서드에서 호출됩니다.
 
         [ServerCallback]
         internal void OnStartServer()
@@ -239,7 +239,7 @@ namespace Mirror.Examples.MultipleMatch
         [ServerCallback]
         internal IEnumerator OnServerDisconnect(NetworkConnectionToClient conn)
         {
-            // Invoke OnPlayerDisconnect on all instances of MatchController
+            // MatchController의 모든 인스턴스에서 OnPlayerDisconnect를 호출합니다.
             OnPlayerDisconnect?.Invoke(conn);
 
             if (playerMatches.TryGetValue(conn, out Guid matchId))
@@ -315,7 +315,7 @@ namespace Mirror.Examples.MultipleMatch
 
         #endregion
 
-        #region Server Match Message Handlers
+        #region 서버 매치 메시지 핸들러
 
         [ServerCallback]
         void OnServerMatchMessage(NetworkConnectionToClient conn, ServerMatchMessage msg)
@@ -500,7 +500,7 @@ namespace Mirror.Examples.MultipleMatch
                     else
                         matchController.player2 = playerConn.identity;
 
-                    /* Reset ready state for after the match. */
+                    /* 매치 후 준비 상태를 리셋합니다. */
                     PlayerInfo playerInfo = playerInfos[playerConn];
                     playerInfo.ready = false;
                     playerInfos[playerConn] = playerInfo;
@@ -519,7 +519,7 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// Sends updated match list to all waiting connections or just one if specified
+        /// 지정된 경우 모든 대기 연결 또는 하나에만 업데이트된 매치 목록을 보냅니다.
         /// </summary>
         /// <param name="conn"></param>
         [ServerCallback]
@@ -534,7 +534,7 @@ namespace Mirror.Examples.MultipleMatch
 
         #endregion
 
-        #region Client Match Message Handler
+        #region 클라이언트 매치 메시지 핸들러
 
         [ClientCallback]
         void OnClientMatchMessage(ClientMatchMessage msg)

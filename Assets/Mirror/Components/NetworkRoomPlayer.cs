@@ -27,7 +27,7 @@ namespace Mirror
         /// </summary>
         [ReadOnly, Tooltip("Diagnostic flag indicating whether this player is ready for the game to begin")]
         [SyncVar(hook = nameof(ReadyStateChanged))]
-        public bool readyToBegin;
+        public bool readyToBegin = true;
 
         /// <summary>
         /// Diagnostic index of the player, e.g. Player1, Player2, etc.
@@ -189,6 +189,27 @@ namespace Mirror
                 GUILayout.EndArea();
             }
         }
+
+        //void DrawPlayerReadyButton()
+        //{
+        //    if (NetworkClient.active && isLocalPlayer)
+        //    {
+        //        GUILayout.BeginArea(new Rect(20f, 300f, 120f, 20f));
+
+        //        if (readyToBegin)
+        //        {
+        //            if (GUILayout.Button("Cancel"))
+        //                CmdChangeReadyState(false);
+        //        }
+        //        else
+        //        {
+        //            if (GUILayout.Button("Ready"))
+        //                CmdChangeReadyState(true);
+        //        }
+
+        //        GUILayout.EndArea();
+        //    }
+        //}
 
         #endregion
     }

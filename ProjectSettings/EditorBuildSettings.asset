@@ -6,12 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Mirror/Examples/MultipleMatches/Scenes/MirrorMultipleMatches.unity
+    guid: aa1f875396fa7d348a782cebc2f75d7c
+  - enabled: 0
     path: Assets/Scenes/Mirror/RoomOffline.unity
     guid: 2dfc625833aa1b24cb9d018223cc51cf
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Mirror/RoomOnline.unity
     guid: ed6d325442ebd044b8b8cc60140816dc
-  - enabled: 1
+  - enabled: 0
+    path: Assets/Scenes/SELECT_CHAMPION.unity
+    guid: ce455824be7713f419f149b3e16522b3
+  - enabled: 0
     path: Assets/Scenes/Mirror/RoomGame.unity
     guid: d102b8804c25ec24eb9d9ed1fbfe7311
   - enabled: 0

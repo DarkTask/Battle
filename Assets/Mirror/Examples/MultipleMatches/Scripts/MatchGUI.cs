@@ -22,7 +22,7 @@ namespace Mirror.Examples.MultipleMatch
 #if UNITY_2022_2_OR_NEWER
             canvasController = GameObject.FindAnyObjectByType<CanvasController>();
 #else
-            // Deprecated in Unity 2023.1
+            // Unity 2023.1에서 사용되지 않음
             canvasController = GameObject.FindObjectOfType<CanvasController>();
 #endif
         }

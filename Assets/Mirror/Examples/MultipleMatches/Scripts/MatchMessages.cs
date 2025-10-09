@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 namespace Mirror.Examples.MultipleMatch
 {
     /// <summary>
-    /// Match message to be sent to the server
+    /// 서버로 보낼 매치 메시지
     /// </summary>
     public struct ServerMatchMessage : NetworkMessage
     {
@@ -12,7 +12,7 @@ namespace Mirror.Examples.MultipleMatch
     }
 
     /// <summary>
-    /// Match message to be sent to the client
+    /// 클라이언트로 보낼 매치 메시지
     /// </summary>
     public struct ClientMatchMessage : NetworkMessage
     {
@@ -23,7 +23,7 @@ namespace Mirror.Examples.MultipleMatch
     }
 
     /// <summary>
-    /// Information about a match
+    /// 매치에 대한 정보
     /// </summary>
     [Serializable]
     public struct MatchInfo
@@ -34,7 +34,7 @@ namespace Mirror.Examples.MultipleMatch
     }
 
     /// <summary>
-    /// Information about a player
+    /// 플레이어에 대한 정보
     /// </summary>
     [Serializable]
     public struct PlayerInfo
@@ -53,7 +53,7 @@ namespace Mirror.Examples.MultipleMatch
     }
 
     /// <summary>
-    /// Match operation to execute on the server
+    /// 서버에서 실행할 매치 작업
     /// </summary>
     public enum ServerMatchOperation : byte
     {
@@ -67,7 +67,7 @@ namespace Mirror.Examples.MultipleMatch
     }
 
     /// <summary>
-    /// Match operation to execute on the client
+    /// 클라이언트에서 실행할 매치 작업
     /// </summary>
     public enum ClientMatchOperation : byte
     {
@@ -101,7 +101,7 @@ namespace Mirror.Examples.MultipleMatch
         B3 = 1 << 7,
         C3 = 1 << 8,
 
-        // winning combinations
+        // 승리 조합
         TopRow = A1 + B1 + C1,
         MidRow = A2 + B2 + C2,
         BotRow = A3 + B3 + C3,
@@ -111,7 +111,7 @@ namespace Mirror.Examples.MultipleMatch
         Diag1 = A1 + B2 + C3,
         Diag2 = A3 + B2 + C1,
 
-        // board is full (winner / draw)
+        // 보드가 꽉 참 (승자 / 무승부)
         Full = TopRow + MidRow + BotRow
     }
 }

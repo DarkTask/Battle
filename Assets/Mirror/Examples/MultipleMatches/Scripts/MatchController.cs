@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,7 +36,7 @@ namespace Mirror.Examples.MultipleMatch
 #if UNITY_2022_2_OR_NEWER
             canvasController = GameObject.FindAnyObjectByType<CanvasController>();
 #else
-            // Deprecated in Unity 2023.1
+            // Unity 2023.1에서 사용되지 않음
             canvasController = GameObject.FindObjectOfType<CanvasController>();
 #endif
         }
@@ -46,8 +46,8 @@ namespace Mirror.Examples.MultipleMatch
             StartCoroutine(AddPlayersToMatchController());
         }
 
-        // For the SyncDictionary to properly fire the update callback, we must
-        // wait a frame before adding the players to the already spawned MatchController
+        // SyncDictionary가 업데이트 콜백을 제대로 실행하려면
+        // 이미 스폰된 MatchController에 플레이어를 추가하기 전에 프레임을 기다려야 합니다.
         IEnumerator AddPlayersToMatchController()
         {
             yield return null;
@@ -65,7 +65,7 @@ namespace Mirror.Examples.MultipleMatch
             exitButton.gameObject.SetActive(false);
             playAgainButton.gameObject.SetActive(false);
 
-            // Assign handler for SyncDictionary changes
+            // SyncDictionary 변경에 대한 핸들러 할당
             matchPlayerData.OnChange = UpdateWins;
         }
 
@@ -98,7 +98,7 @@ namespace Mirror.Examples.MultipleMatch
         [Command(requiresAuthority = false)]
         public void CmdMakePlay(CellValue cellValue, NetworkConnectionToClient sender = null)
         {
-            // If wrong player or cell already taken, ignore
+            // 잘못된 플레이어이거나 셀이 이미 차지된 경우 무시
             if (sender.identity != currentPlayer || MatchCells[cellValue].playerIdentity != null)
                 return;
 
@@ -125,7 +125,7 @@ namespace Mirror.Examples.MultipleMatch
             }
             else
             {
-                // Set currentPlayer SyncVar so clients know whose turn it is
+                // 클라이언트가 누구의 턴인지 알 수 있도록 currentPlayer SyncVar 설정
                 currentPlayer = currentPlayer == player1 ? player2 : player1;
             }
 
@@ -186,7 +186,7 @@ namespace Mirror.Examples.MultipleMatch
             playAgainButton.gameObject.SetActive(true);
         }
 
-        // Assigned in inspector to ReplayButton::OnClick
+        // 인스펙터에서 ReplayButton::OnClick에 할당됨
         [ClientCallback]
         public void RequestPlayAgain()
         {
@@ -237,7 +237,7 @@ namespace Mirror.Examples.MultipleMatch
             playAgainButton.gameObject.SetActive(false);
         }
 
-        // Assigned in inspector to BackButton::OnClick
+        // 인스펙터에서 BackButton::OnClick에 할당됨
         [Client]
         public void RequestExitGame()
         {
@@ -255,7 +255,7 @@ namespace Mirror.Examples.MultipleMatch
         [ServerCallback]
         public void OnPlayerDisconnect(NetworkConnectionToClient conn)
         {
-            // Check that the disconnecting client is a player in this match
+            // 연결이 끊긴 클라이언트가 이 매치의 플레이어인지 확인
             if (player1 == conn.identity || player2 == conn.identity)
                 StartCoroutine(ServerEndMatch(conn, true));
         }
@@ -267,11 +267,11 @@ namespace Mirror.Examples.MultipleMatch
 
             canvasController.OnPlayerDisconnect -= OnPlayerDisconnect;
 
-            // Wait for the ClientRpc to get out ahead of object destruction
+            // ClientRpc가 객체 파괴보다 먼저 나가도록 기다립니다.
             yield return new WaitForSeconds(0.1f);
 
-            // Mirror will clean up the disconnecting client so we only need to clean up the other remaining client.
-            // If both players are just returning to the Lobby, we need to remove both connection Players
+            // Mirror는 연결이 끊긴 클라이언트를 정리하므로 나머지 클라이언트만 정리하면 됩니다.
+            // 두 플레이어 모두 로비로 돌아가는 경우 두 연결 플레이어를 모두 제거해야 합니다.
 
             if (!disconnected)
             {
@@ -283,21 +283,21 @@ namespace Mirror.Examples.MultipleMatch
             }
             else if (conn == player1.connectionToClient)
             {
-                // player1 has disconnected - send player2 back to Lobby
+                // player1 연결 끊김 - player2를 로비로 돌려보냄
                 NetworkServer.RemovePlayerForConnection(player2.connectionToClient, RemovePlayerOptions.Destroy);
                 CanvasController.waitingConnections.Add(player2.connectionToClient);
             }
             else if (conn == player2.connectionToClient)
             {
-                // player2 has disconnected - send player1 back to Lobby
+                // player2 연결 끊김 - player1을 로비로 돌려보냄
                 NetworkServer.RemovePlayerForConnection(player1.connectionToClient, RemovePlayerOptions.Destroy);
                 CanvasController.waitingConnections.Add(player1.connectionToClient);
             }
 
-            // Skip a frame to allow the Removal(s) to complete
+            // 제거가 완료될 때까지 프레임 건너뛰기
             yield return null;
 
-            // Send latest match list
+            // 최신 매치 목록 보내기
             canvasController.SendMatchList();
 
             NetworkServer.Destroy(gameObject);

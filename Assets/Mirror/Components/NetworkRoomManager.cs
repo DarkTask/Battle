@@ -661,6 +661,25 @@ namespace Mirror
         /// <summary>
         /// virtual so inheriting classes can roll their own
         /// </summary>
+        //public virtual void OnGUI()
+        //{
+        //    if (!showRoomGUI)
+        //        return;
+
+        //    if (NetworkServer.active && Utils.IsSceneActive(GameplayScene))
+        //    {
+        //        // GM 추가
+        //        if (this.roomSlots.Count < this.maxConnections)
+        //        {
+        //            ServerChangeScene(RoomScene);
+        //        }
+        //    }
+
+        //    if (Utils.IsSceneActive(RoomScene))
+        //        GUI.Box(new Rect(10f, 180f, 520f, 150f), "PLAYERS");
+        //}
+
+        // GM 주석
         public virtual void OnGUI()
         {
             if (!showRoomGUI)

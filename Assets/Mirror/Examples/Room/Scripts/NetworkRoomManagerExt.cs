@@ -23,6 +23,9 @@ namespace Mirror.Examples.NetworkRoom
         /// <param name="sceneName">Name of the new scene.</param>
         public override void OnRoomServerSceneChanged(string sceneName)
         {
+            // GM 리턴
+            return;
+
             // spawn the initial batch of Rewards
             if (sceneName == GameplayScene)
             {
@@ -35,6 +38,9 @@ namespace Mirror.Examples.NetworkRoom
 
         public override void OnRoomClientSceneChanged()
         {
+            // GM 리턴
+            return;
+
             // Don't initialize the pool for host client because it's
             // already initialized in OnRoomServerSceneChanged
             if (NetworkServer.active) return;
@@ -55,6 +61,9 @@ namespace Mirror.Examples.NetworkRoom
         /// <returns>true unless some code in here decides it needs to abort the replacement</returns>
         public override bool OnRoomServerSceneLoadedForPlayer(NetworkConnectionToClient conn, GameObject roomPlayer, GameObject gamePlayer)
         {
+            // GM 리턴
+            return true;
+
             PlayerScore playerScore = gamePlayer.GetComponent<PlayerScore>();
             playerScore.index = roomPlayer.GetComponent<NetworkRoomPlayer>().index;
             return true;

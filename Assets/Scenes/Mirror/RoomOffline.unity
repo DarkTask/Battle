@@ -274,11 +274,11 @@ MonoBehaviour:
   offlineSceneLoadDelay: 0
   transport: {fileID: 2008127830}
   networkAddress: localhost
-  maxConnections: 5
+  maxConnections: 2
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 1480027675339556, guid: 21daf89214c6ee443ad6875b73083c60,
+  playerPrefab: {fileID: 1588750985201798, guid: 64c6df9968fb6e0408fdcd6c84bc9e66,
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 1
@@ -299,11 +299,11 @@ MonoBehaviour:
   evaluationInterval: 3
   timeInterpolationGui: 0
   showRoomGUI: 1
-  minPlayers: 1
+  minPlayers: 2
   roomPlayerPrefab: {fileID: 114033720796874720, guid: deae2134a1d77704b9c595efe69767dd,
     type: 3}
   RoomScene: Assets/Scenes/Mirror/RoomOnline.unity
-  GameplayScene: Assets/Scenes/Mirror/RoomGame.unity
+  GameplayScene: Assets/Scenes/SELECT_CHAMPION.unity
   _allPlayersReady: 0
   clientIndex: 0
   rewardPrefab: {fileID: 1139254171913846, guid: 52f1c9ea06cfd154cb68ff9d1b66fc13,
