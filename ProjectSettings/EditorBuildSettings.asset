@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Mirror/LTF_MirrorMultipleMatches.unity
+    guid: d6b731d4c169209448ffaea0e76097ed
+  - enabled: 0
     path: Assets/Mirror/Examples/MultipleMatches/Scenes/MirrorMultipleMatches.unity
     guid: aa1f875396fa7d348a782cebc2f75d7c
   - enabled: 0

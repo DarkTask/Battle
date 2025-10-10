@@ -8,6 +8,12 @@ namespace Mirror.Examples.MultipleMatch
     [RequireComponent(typeof(NetworkMatch))]
     public class MatchController : NetworkBehaviour
     {
+        // ---------------------------------------------------------------- LFT ----------------------------------------------------------------
+
+        internal readonly Dictionary<int, CharacterElement> DicCharacterElement = new Dictionary<int, CharacterElement>();
+
+        // ---------------------------------------------------------------- LFT ----------------------------------------------------------------
+
         internal readonly SyncDictionary<NetworkIdentity, MatchPlayerData> matchPlayerData = new SyncDictionary<NetworkIdentity, MatchPlayerData>();
         internal readonly Dictionary<CellValue, CellGUI> MatchCells = new Dictionary<CellValue, CellGUI>();
 
@@ -307,6 +313,57 @@ namespace Mirror.Examples.MultipleMatch
         public void RpcExitGame()
         {
             canvasController.OnMatchEnded();
+        }
+
+        //---------------------------------------------------------------- LFT ----------------------------------------------------------------
+
+        [ClientRpc]
+        public void RpcUpdateIndex(int index, NetworkIdentity player)
+        {
+            DicCharacterElement[index].SetPlayer(player);
+        }
+
+        [Command(requiresAuthority = false)]
+        public void CmdCharacterClick(int index, NetworkConnectionToClient sender = null)
+        {
+            // 잘못된 플레이어이거나 셀이 이미 차지된 경우 무시
+            if (sender.identity != currentPlayer && DicCharacterElement[index].playerIdentity != null)
+                return;
+
+            DicCharacterElement[index].playerIdentity = currentPlayer;
+
+            currentPlayer = currentPlayer == player1 ? player2 : player1;
+
+            RpcUpdateIndex(index, currentPlayer);
+
+            return;
+
+
+            MatchPlayerData mpd = matchPlayerData[currentPlayer];
+            //mpd.currentScore = mpd.currentScore | cellValue;
+            matchPlayerData[currentPlayer] = mpd;
+
+            //boardScore |= cellValue;
+
+            if (CheckWinner(mpd.currentScore))
+            {
+                mpd.wins += 1;
+                matchPlayerData[currentPlayer] = mpd;
+                RpcShowWinner(currentPlayer);
+                currentPlayer = null;
+            }
+            else if (boardScore == CellValue.Full)
+            {
+                RpcShowWinner(null);
+                currentPlayer = null;
+            }
+            else
+            {
+                // 클라이언트가 누구의 턴인지 알 수 있도록 currentPlayer SyncVar 설정
+                currentPlayer = currentPlayer == player1 ? player2 : player1;
+            }
+
+            
         }
     }
 }

@@ -880,7 +880,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: LTF
+  m_Text: 'LTF
+
+'
 --- !u!222 &777606424
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1192,7 +1194,7 @@ MonoBehaviour:
   autoCreatePlayer: 0
   playerSpawnMethod: 1
   spawnPrefabs:
-  - {fileID: 2923784255186993310, guid: e101d385946c91b4c81f318efc723a88, type: 3}
+  - {fileID: 8222659367022836919, guid: 12132225cbee3814cbae2ea6f9db8cf5, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -2823,7 +2825,7 @@ MonoBehaviour:
   matchList: {fileID: 1386671668}
   matchPrefab: {fileID: 3533216216399874123, guid: df3727c2222378b4ca786485a8b09981,
     type: 3}
-  matchControllerPrefab: {fileID: 2923784255186993310, guid: e101d385946c91b4c81f318efc723a88,
+  matchControllerPrefab: {fileID: 8222659367022836919, guid: 12132225cbee3814cbae2ea6f9db8cf5,
     type: 3}
   createButton: {fileID: 1100846363}
   joinButton: {fileID: 8446052}

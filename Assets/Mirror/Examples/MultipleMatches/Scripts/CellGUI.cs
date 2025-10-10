@@ -20,6 +20,9 @@ namespace Mirror.Examples.MultipleMatch
             matchController.MatchCells.Add(cellValue, this);
         }
 
+        /// <summary>
+        /// button Å¬¸¯ºÎ
+        /// </summary>
         [ClientCallback]
         public void MakePlay()
         {
