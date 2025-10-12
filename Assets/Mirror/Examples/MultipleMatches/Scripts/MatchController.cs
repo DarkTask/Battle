@@ -12,6 +12,8 @@ namespace Mirror.Examples.MultipleMatch
 
         internal readonly Dictionary<int, CharacterElement> DicCharacterElement = new Dictionary<int, CharacterElement>();
 
+        internal readonly Dictionary<int, CardElement> DicCardElement = new Dictionary<int, CardElement>();
+
         // ---------------------------------------------------------------- LFT ----------------------------------------------------------------
 
         internal readonly SyncDictionary<NetworkIdentity, MatchPlayerData> matchPlayerData = new SyncDictionary<NetworkIdentity, MatchPlayerData>();
@@ -316,6 +318,8 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         //---------------------------------------------------------------- LFT ----------------------------------------------------------------
+
+        private int SelectCount = 0;
 
         [ClientRpc]
         public void RpcUpdateIndex(int index, NetworkIdentity player)
