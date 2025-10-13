@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,10 @@ namespace Mirror.Examples.MultipleMatch
 
         internal readonly Dictionary<int, CharacterElement> DicCharacterElement = new Dictionary<int, CharacterElement>();
 
-        internal readonly Dictionary<int, CardElement> DicCardElement = new Dictionary<int, CardElement>();
+        /// <summary>
+        /// Key : (player 0~1, index)
+        /// </summary>
+        internal readonly Dictionary<int, List<CardElement>> DicCardElement = new Dictionary<int, List<CardElement>>();
 
         // ---------------------------------------------------------------- LFT ----------------------------------------------------------------
 
@@ -319,12 +323,16 @@ namespace Mirror.Examples.MultipleMatch
 
         //---------------------------------------------------------------- LFT ----------------------------------------------------------------
 
-        private int SelectCount = 0;
-
         [ClientRpc]
-        public void RpcUpdateIndex(int index, NetworkIdentity player)
+        public void RpcUpdateIndex(int index, NetworkIdentity player, int playerIndex)
         {
-            DicCharacterElement[index].SetPlayer(player);
+            DicCharacterElement[index].SetPlayer(player, playerIndex);
+
+            var championName = DicCharacterElement[index].name.text.ToString();
+
+            var cardIndex = DicCardElement[playerIndex].Where(x => x.isSetup == true).Count();
+
+            DicCardElement[playerIndex][cardIndex].SetCard(player, championName);
         }
 
         [Command(requiresAuthority = false)]
@@ -336,9 +344,16 @@ namespace Mirror.Examples.MultipleMatch
 
             DicCharacterElement[index].playerIdentity = currentPlayer;
 
+            int playerIndex = 0;
+
+            if (currentPlayer == player1)
+                playerIndex = 0;
+            else
+                playerIndex = 1;
+
             currentPlayer = currentPlayer == player1 ? player2 : player1;
 
-            RpcUpdateIndex(index, currentPlayer);
+            RpcUpdateIndex(index, currentPlayer, playerIndex);
 
             return;
 

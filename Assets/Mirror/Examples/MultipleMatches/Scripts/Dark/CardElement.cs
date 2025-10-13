@@ -16,7 +16,11 @@ public class CardElement : MonoBehaviour
 
     public TextMeshProUGUI name;
 
+    public int player;
+
     public int index;
+
+    public bool isSetup = false;
 
     [Header("Diagnostics")]
     [ReadOnly, SerializeField] internal NetworkIdentity playerIdentity;
@@ -24,7 +28,17 @@ public class CardElement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        matchController.DicCardElement.Add(index, this);
+        if (matchController.DicCardElement.ContainsKey(player) == false)
+        {
+            matchController.DicCardElement.Add(player, new System.Collections.Generic.List<CardElement>());
+            matchController.DicCardElement[player].Add(this);
+        }
+        else
+        {
+            matchController.DicCardElement[player].Add(this);
+        }
+
+        Debug.Log("matchController.DicCardElement : " + index);
 
         //button = GetComponent<Button>();
 
@@ -42,12 +56,12 @@ public class CardElement : MonoBehaviour
     }
 
     [ClientCallback]
-    public void SetCard(NetworkIdentity playerIdentity, string name)
+    public void SetCard(NetworkIdentity playerIdentity, string championName)
     {
         if (playerIdentity != null)
         {
             this.playerIdentity = playerIdentity;
-            image.color = this.playerIdentity.isLocalPlayer ? Color.blue : Color.red;
+            name.text = championName;
         }
         else
         {
@@ -55,13 +69,15 @@ public class CardElement : MonoBehaviour
             image.color = Color.white;
         }
 
-        ChampionImageManager.Champion champion = (ChampionImageManager.Champion)Enum.Parse(typeof(ChampionImageManager.Champion), name);
+        ChampionImageManager.Champion champion = (ChampionImageManager.Champion)Enum.Parse(typeof(ChampionImageManager.Champion), championName);
 
         var sprite = ChampionImageManager.instance.GetSprite(champion);
         if (sprite != null)
         {
             image.sprite = sprite;
         }
+
+        isSetup = true;
     }
 
     //[ClientCallback]

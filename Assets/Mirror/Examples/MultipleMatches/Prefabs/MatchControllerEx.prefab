@@ -5674,6 +5674,7 @@ GameObject:
   - component: {fileID: 8176304768121327757}
   - component: {fileID: 1306048673837743873}
   - component: {fileID: 7940122994833977016}
+  - component: {fileID: 7917212397674550328}
   m_Layer: 5
   m_Name: Card_Blue 2
   m_TagString: Untagged
@@ -5745,6 +5746,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7917212397674550328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 930052854616492911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d6c1ff33a93e847bf951129f542dd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Examples::CardElement
+  matchController: {fileID: 8681805869827358630}
+  image: {fileID: 2119700008656090382}
+  name: {fileID: 9084799172798121808}
+  player: 1
+  index: 2
+  isSetup: 0
+  playerIdentity: {fileID: 0}
 --- !u!1 &944715918623981454
 GameObject:
   m_ObjectHideFlags: 0
@@ -6732,6 +6752,7 @@ GameObject:
   - component: {fileID: 6958460643565558727}
   - component: {fileID: 5893005163274825422}
   - component: {fileID: 6029188584087133763}
+  - component: {fileID: 439407592776260821}
   m_Layer: 5
   m_Name: Card_Red 2
   m_TagString: Untagged
@@ -6803,6 +6824,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &439407592776260821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028101142309741690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d6c1ff33a93e847bf951129f542dd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Examples::CardElement
+  matchController: {fileID: 8681805869827358630}
+  image: {fileID: 8946958818350413371}
+  name: {fileID: 7692027621674862350}
+  player: 0
+  index: 2
+  isSetup: 0
+  playerIdentity: {fileID: 0}
 --- !u!1 &1029225000666813569
 GameObject:
   m_ObjectHideFlags: 0
@@ -9129,6 +9169,7 @@ GameObject:
   - component: {fileID: 5507778147742056476}
   - component: {fileID: 1760086736942379498}
   - component: {fileID: 7634843940222555358}
+  - component: {fileID: 4030151330791912468}
   m_Layer: 5
   m_Name: Card_Blue 1
   m_TagString: Untagged
@@ -9200,6 +9241,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4030151330791912468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1285366064875493424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d6c1ff33a93e847bf951129f542dd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Examples::CardElement
+  matchController: {fileID: 8681805869827358630}
+  image: {fileID: 7875178586646136052}
+  name: {fileID: 6129084742870355290}
+  player: 1
+  index: 1
+  isSetup: 0
+  playerIdentity: {fileID: 0}
 --- !u!1 &1303040830247414961
 GameObject:
   m_ObjectHideFlags: 0
@@ -16859,6 +16919,7 @@ GameObject:
   - component: {fileID: 8387226412329644922}
   - component: {fileID: 4136475232099807231}
   - component: {fileID: 6951054761076081005}
+  - component: {fileID: 474514523443928545}
   m_Layer: 5
   m_Name: Card_Red 1
   m_TagString: Untagged
@@ -16930,6 +16991,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &474514523443928545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2428207625075715440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d6c1ff33a93e847bf951129f542dd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Examples::CardElement
+  matchController: {fileID: 8681805869827358630}
+  image: {fileID: 7669166423832634146}
+  name: {fileID: 6857952431279164364}
+  player: 0
+  index: 1
+  isSetup: 0
+  playerIdentity: {fileID: 0}
 --- !u!1 &2445902260000352264
 GameObject:
   m_ObjectHideFlags: 0
@@ -52634,6 +52714,7 @@ GameObject:
   - component: {fileID: 6144079233100405243}
   - component: {fileID: 8609912466699019049}
   - component: {fileID: 1783743236904133095}
+  - component: {fileID: 1132521294597545631}
   m_Layer: 5
   m_Name: Card_Blue 0
   m_TagString: Untagged
@@ -52705,6 +52786,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1132521294597545631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7679669417319076569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d6c1ff33a93e847bf951129f542dd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Examples::CardElement
+  matchController: {fileID: 8681805869827358630}
+  image: {fileID: 4326888328785694762}
+  name: {fileID: 2194532054078612119}
+  player: 1
+  index: 0
+  isSetup: 0
+  playerIdentity: {fileID: 0}
 --- !u!1 &7684862915159315050
 GameObject:
   m_ObjectHideFlags: 0
@@ -56759,6 +56859,7 @@ GameObject:
   - component: {fileID: 460981682467114379}
   - component: {fileID: 2914127143947845671}
   - component: {fileID: 3961128611422504061}
+  - component: {fileID: 6599717482614293277}
   m_Layer: 5
   m_Name: Card_Red 0
   m_TagString: Untagged
@@ -56830,6 +56931,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6599717482614293277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8215054629055716160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5d6c1ff33a93e847bf951129f542dd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Examples::CardElement
+  matchController: {fileID: 8681805869827358630}
+  image: {fileID: 1625140417244968279}
+  name: {fileID: 7976855399581080611}
+  player: 0
+  index: 0
+  isSetup: 0
+  playerIdentity: {fileID: 0}
 --- !u!1 &8218153397098810665
 GameObject:
   m_ObjectHideFlags: 0

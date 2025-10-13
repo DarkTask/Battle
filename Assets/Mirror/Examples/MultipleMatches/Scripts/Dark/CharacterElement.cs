@@ -51,12 +51,22 @@ public class CharacterElement : MonoBehaviour
     }
 
     [ClientCallback]
-    public void SetPlayer(NetworkIdentity playerIdentity)
+    public void SetPlayer(NetworkIdentity playerIdentity, int playerIndex)
     {
         if (playerIdentity != null)
         {
             this.playerIdentity = playerIdentity;
-            image.color = this.playerIdentity.isLocalPlayer ? Color.blue : Color.red;
+
+            if (playerIndex == 0)
+            {
+                image.color = Color.red;
+            }
+            else
+            {
+                image.color = Color.blue;
+            }
+
+            //image.color = this.playerIdentity.isLocalPlayer ? Color.blue : Color.red;
             button.interactable = false;
         }
         else
