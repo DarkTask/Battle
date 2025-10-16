@@ -44,9 +44,9 @@ public class CardElement : MonoBehaviour
 
         //button.onClick.AddListener(OnClick);
 
-        string result = image.sprite.name.Substring(0, image.sprite.name.IndexOf('_'));
+        //string result = image.sprite.name.Substring(0, image.sprite.name.IndexOf('_'));
 
-        name.text = result;
+        //name.text = result;
     }
 
     // Update is called once per frame
@@ -75,6 +75,7 @@ public class CardElement : MonoBehaviour
         if (sprite != null)
         {
             image.sprite = sprite;
+            image.color = Color.white;
         }
 
         isSetup = true;

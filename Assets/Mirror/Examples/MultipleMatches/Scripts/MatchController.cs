@@ -33,6 +33,7 @@ namespace Mirror.Examples.MultipleMatch
         public Button playAgainButton;
         public Text winCountLocal;
         public Text winCountOpponent;
+        public GameObject Panels;
 
         [Header("Diagnostics")]
         [ReadOnly, SerializeField] internal CanvasController canvasController;
@@ -335,6 +336,14 @@ namespace Mirror.Examples.MultipleMatch
             DicCardElement[playerIndex][cardIndex].SetCard(player, championName);
         }
 
+        [ClientRpc]
+        public void RpcDisablePanel()
+        {
+            Panels.SetActive(false);
+        }
+
+        int cnt = 0;
+
         [Command(requiresAuthority = false)]
         public void CmdCharacterClick(int index, NetworkConnectionToClient sender = null)
         {
@@ -354,6 +363,13 @@ namespace Mirror.Examples.MultipleMatch
             currentPlayer = currentPlayer == player1 ? player2 : player1;
 
             RpcUpdateIndex(index, currentPlayer, playerIndex);
+
+            cnt++;
+
+            if (cnt == 6)
+            {
+                RpcDisablePanel();
+            }
 
             return;
 
