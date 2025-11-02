@@ -240,13 +240,12 @@ public class BattleGameManager : NetworkBehaviour
         switch (newState)
         {
             case GameState.OrderSetup:
-                // TODO: OrderSetupPanel 표시
                 Debug.Log("📋 전투 순서 지정 단계로 이동");
+                // MatchController가 RpcDisablePanel에서 자동으로 BattleOrderUI를 표시함
                 break;
             
             case GameState.Battle_Round1:
-                // TODO: Round 1 전투 시작
-                Debug.Log("⚔️ Round 1 시작");
+                OnBattleStart();
                 break;
             
             case GameState.Result:
@@ -254,6 +253,33 @@ public class BattleGameManager : NetworkBehaviour
                 Debug.Log("🏆 결과 화면");
                 break;
         }
+    }
+    
+    /// <summary>
+    /// 전투 시작 (클라이언트)
+    /// </summary>
+    void OnBattleStart()
+    {
+        Debug.Log("⚔️ Round 1 전투 시작");
+        
+        // 전투 순서 확인 (디버그)
+        if (playerA.IsBattleOrderComplete())
+        {
+            Debug.Log($"🔹 Player A 전투 순서: " +
+                $"1번={playerA.GetChampionAtSlot(0)?.championName}, " +
+                $"2번={playerA.GetChampionAtSlot(1)?.championName}, " +
+                $"3번={playerA.GetChampionAtSlot(2)?.championName}");
+        }
+        
+        if (playerB.IsBattleOrderComplete())
+        {
+            Debug.Log($"🔹 Player B 전투 순서: " +
+                $"1번={playerB.GetChampionAtSlot(0)?.championName}, " +
+                $"2번={playerB.GetChampionAtSlot(1)?.championName}, " +
+                $"3번={playerB.GetChampionAtSlot(2)?.championName}");
+        }
+        
+        // TODO: 실제 전투 UI 표시 및 전투 로직 시작
     }
     
     #endregion
@@ -335,6 +361,29 @@ public class BattleGameManager : NetworkBehaviour
     public PlayerGameData GetPlayerData(int playerIndex)
     {
         return playerIndex == 0 ? playerA : playerB;
+    }
+    
+    /// <summary>
+    /// 전투 시작 (서버에서 호출)
+    /// </summary>
+    [Server]
+    public void StartBattle()
+    {
+        // 양쪽 플레이어의 전투 순서가 완료되었는지 확인
+        if (!playerA.IsBattleOrderComplete())
+        {
+            Debug.LogError("Player A의 전투 순서가 완료되지 않았습니다!");
+            return;
+        }
+        
+        if (!playerB.IsBattleOrderComplete())
+        {
+            Debug.LogError("Player B의 전투 순서가 완료되지 않았습니다!");
+            return;
+        }
+        
+        Debug.Log("✅ 전투 시작 조건 충족! Round 1 시작");
+        ChangeState(GameState.Battle_Round1);
     }
     
     #endregion

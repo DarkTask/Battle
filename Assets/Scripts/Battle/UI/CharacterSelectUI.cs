@@ -43,7 +43,7 @@ public class CharacterSelectUI : MonoBehaviour
     }
     
     /// <summary>
-    /// 12개 챔피언 카드 초기화
+    /// 12개 챔피언 카드 초기화 (BattleGameManager 연동)
     /// </summary>
     void InitializeChampions()
     {
@@ -67,7 +67,7 @@ public class CharacterSelectUI : MonoBehaviour
             ChampionData data = championDB.GetChampion(i);
             if (data != null)
             {
-                characterElements[i].Initialize(data, i);
+                characterElements[i].InitializeWithChampionData(data, i);
             }
             else
             {
@@ -126,7 +126,7 @@ public class CharacterSelectUI : MonoBehaviour
         {
             if (characterElements[championIndex] != null)
             {
-                characterElements[championIndex].SetSelected(true, playerIndex);
+                characterElements[championIndex].SetSelectedState(true, playerIndex);
             }
         }
         
