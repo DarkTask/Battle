@@ -14,17 +14,28 @@ public class BattleCharacterController : NetworkBehaviour
     public int currentHealth = 100;
     [SyncVar] public int playerIndex = 0; // 0=A, 1=B
     
-    [Header("UI")]
+    [Header("UI (Optional)")]
     public Canvas healthCanvas;
     public TMPro.TextMeshProUGUI healthText;
     public UnityEngine.UI.Image healthBar;
     
-    [Header("Visual")]
+    [Header("Visual (Optional)")]
     public Animator animator;
     public Renderer characterRenderer;
     
+    [Header("MoreMountains Integration")]
+    private MonoBehaviour mmHealth;  // MoreMountains Health 컴포넌트 (Generic으로 처리)
+    
     void Start()
     {
+        // MoreMountains Health 컴포넌트 찾기 (이름으로)
+        var healthComponent = GetComponent("Health");
+        if (healthComponent != null)
+        {
+            mmHealth = healthComponent as MonoBehaviour;
+            Debug.Log($"✅ {championName}: MoreMountains Health 컴포넌트 발견");
+        }
+        
         UpdateHealthUI();
     }
     
@@ -55,6 +66,25 @@ public class BattleCharacterController : NetworkBehaviour
         if (currentHealth < 0) currentHealth = 0;
         
         Debug.Log($"💥 {championName} takes {damage} damage! HP: {currentHealth}/{maxHealth}");
+        
+        // MoreMountains Health 시스템과 연동 (Reflection 사용)
+        if (mmHealth != null)
+        {
+            try
+            {
+                // Reflection으로 Damage 메서드 호출
+                var damageMethod = mmHealth.GetType().GetMethod("Damage");
+                if (damageMethod != null)
+                {
+                    damageMethod.Invoke(mmHealth, new object[] { (float)damage, gameObject, 0f, 0f, Vector3.zero });
+                    Debug.Log($"💥 MoreMountains Health.Damage() 호출: {damage}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"⚠️ MoreMountains Health.Damage() 호출 실패: {e.Message}");
+            }
+        }
         
         // 공격받는 애니메이션
         RpcPlayHitAnimation();
@@ -115,9 +145,24 @@ public class BattleCharacterController : NetworkBehaviour
     [ClientRpc]
     void RpcSetColor(Color color)
     {
+        // Renderer 자동 찾기
+        if (characterRenderer == null)
+        {
+            characterRenderer = GetComponentInChildren<Renderer>();
+        }
+        
         if (characterRenderer != null)
         {
-            characterRenderer.material.color = color;
+            // 새로운 Material 인스턴스 생성 (공유 Material 변경 방지)
+            if (characterRenderer.material != null)
+            {
+                characterRenderer.material = new Material(characterRenderer.material);
+                characterRenderer.material.color = color;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ {championName}: Renderer를 찾을 수 없습니다!");
         }
     }
     

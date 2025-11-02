@@ -77,6 +77,16 @@ public class BattleArenaManager : NetworkBehaviour
             battleCanvas.gameObject.SetActive(true);
         }
         
+        // 메인 카메라를 전투 위치로 이동
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            // 카메라를 아레나 중앙 위에서 내려다보도록 설정
+            mainCamera.transform.position = new Vector3(0, 10, -5);
+            mainCamera.transform.rotation = Quaternion.Euler(60, 0, 0);
+            Debug.Log($"📷 메인 카메라 이동: {mainCamera.transform.position}");
+        }
+        
         Debug.Log("🎬 전투 아레나 활성화");
     }
     
@@ -172,6 +182,9 @@ public class BattleArenaManager : NetworkBehaviour
         
         NetworkServer.Spawn(currentPlayerACharacter);
         
+        // 모든 Renderer 활성화 (중요!)
+        ActivateAllRenderers(currentPlayerACharacter, "Player A");
+        
         playerAController = currentPlayerACharacter.GetComponent<BattleCharacterController>();
         if (playerAController != null)
         {
@@ -180,6 +193,13 @@ public class BattleArenaManager : NetworkBehaviour
         else
         {
             Debug.LogError("❌ Player A: BattleCharacterController를 찾을 수 없습니다!");
+        }
+        
+        // AI Character 설정 (MoreMountains)
+        var characterA = currentPlayerACharacter.GetComponent("Character");
+        if (characterA != null)
+        {
+            Debug.Log("✅ Player A Character 컴포넌트 발견 (MoreMountains)");
         }
         
         // Player B 캐릭터 스폰
@@ -191,6 +211,9 @@ public class BattleArenaManager : NetworkBehaviour
         
         NetworkServer.Spawn(currentPlayerBCharacter);
         
+        // 모든 Renderer 활성화 (중요!)
+        ActivateAllRenderers(currentPlayerBCharacter, "Player B");
+        
         playerBController = currentPlayerBCharacter.GetComponent<BattleCharacterController>();
         if (playerBController != null)
         {
@@ -201,8 +224,107 @@ public class BattleArenaManager : NetworkBehaviour
             Debug.LogError("❌ Player B: BattleCharacterController를 찾을 수 없습니다!");
         }
         
+        // AI Character 설정 (MoreMountains)
+        var characterB = currentPlayerBCharacter.GetComponent("Character");
+        if (characterB != null)
+        {
+            Debug.Log("✅ Player B Character 컴포넌트 발견 (MoreMountains)");
+        }
+        
+        // AI 서로를 타겟으로 설정 (필요시 - Reflection으로 구현 가능)
+        // var characterA = currentPlayerACharacter.GetComponent("Character");
+        // if (characterA != null) {
+        //     var setTargetMethod = characterA.GetType().GetMethod("SetTarget");
+        //     setTargetMethod?.Invoke(characterA, new object[] { currentPlayerBCharacter.transform });
+        // }
+        
         Debug.Log($"✅ 캐릭터 스폰: {playerACard.name.text} vs {playerBCard.name.text}");
-        Debug.Log($"📍 스폰된 오브젝트: A={currentPlayerACharacter.name}, B={currentPlayerBCharacter.name}");
+        Debug.Log($"📍 스폰된 오브젝트: A={currentPlayerACharacter.name} at {currentPlayerACharacter.transform.position}");
+        Debug.Log($"📍 스폰된 오브젝트: B={currentPlayerBCharacter.name} at {currentPlayerBCharacter.transform.position}");
+        
+        // 디버그: 스폰 위치에 Sphere 그리기 (Gizmo)
+        RpcDrawDebugMarkers(spawnPosA, spawnPosB);
+    }
+    
+    /// <summary>
+    /// 모든 Renderer 활성화
+    /// </summary>
+    [Server]
+    void ActivateAllRenderers(GameObject character, string playerName)
+    {
+        if (character == null) return;
+        
+        // 모든 하위 GameObject 활성화
+        foreach (Transform child in character.GetComponentsInChildren<Transform>(true))
+        {
+            child.gameObject.SetActive(true);
+        }
+        
+        // 모든 Renderer 활성화
+        var renderers = character.GetComponentsInChildren<Renderer>(true);
+        int activatedCount = 0;
+        
+        foreach (var renderer in renderers)
+        {
+            if (!renderer.enabled)
+            {
+                renderer.enabled = true;
+                activatedCount++;
+                Debug.Log($"🎨 {playerName}: Renderer 활성화 - {renderer.gameObject.name}");
+            }
+        }
+        
+        Debug.Log($"✅ {playerName}: 총 {activatedCount}개 Renderer 활성화 (전체 {renderers.Length}개)");
+        
+        // RPC로 클라이언트에도 전파
+        RpcActivateRenderers(character);
+    }
+    
+    /// <summary>
+    /// 클라이언트에서도 Renderer 활성화
+    /// </summary>
+    [ClientRpc]
+    void RpcActivateRenderers(GameObject character)
+    {
+        if (character == null) return;
+        
+        // 모든 하위 GameObject 활성화
+        foreach (Transform child in character.GetComponentsInChildren<Transform>(true))
+        {
+            child.gameObject.SetActive(true);
+        }
+        
+        // 모든 Renderer 활성화
+        var renderers = character.GetComponentsInChildren<Renderer>(true);
+        foreach (var renderer in renderers)
+        {
+            renderer.enabled = true;
+        }
+        
+        Debug.Log($"[Client] 캐릭터 Renderer 활성화: {character.name}");
+    }
+    
+    /// <summary>
+    /// 디버그: 스폰 위치 시각화
+    /// </summary>
+    [ClientRpc]
+    void RpcDrawDebugMarkers(Vector3 posA, Vector3 posB)
+    {
+        // 빨간 Sphere (Player A)
+        var markerA = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        markerA.transform.position = posA + Vector3.up * 2;
+        markerA.transform.localScale = Vector3.one * 0.5f;
+        markerA.GetComponent<Renderer>().material.color = Color.red;
+        Destroy(markerA, 5f); // 5초 후 삭제
+        
+        // 파란 Sphere (Player B)
+        var markerB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        markerB.transform.position = posB + Vector3.up * 2;
+        markerB.transform.localScale = Vector3.one * 0.5f;
+        markerB.GetComponent<Renderer>().material.color = Color.blue;
+        Destroy(markerB, 5f); // 5초 후 삭제
+        
+        Debug.Log($"🎯 디버그 마커 생성: Red at {posA}, Blue at {posB}");
     }
     
     /// <summary>
