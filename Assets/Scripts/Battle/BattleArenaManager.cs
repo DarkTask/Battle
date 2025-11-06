@@ -36,15 +36,81 @@ public class BattleArenaManager : NetworkBehaviour
     
     void Awake()
     {
+        Debug.Log($"🔧 BattleArenaManager.Awake() (isServer={isServer}, isClient={isClient}, GameObject={gameObject.name})");
+
         if (Instance == null)
+        {
             Instance = this;
+            Debug.Log("   ✅ BattleArenaManager.Instance 설정 완료");
+
+            // DontDestroyOnLoad 제거 (Scene Object이므로 불필요)
+            // 씬 전환 시 자동으로 파괴되도록 함
+        }
         else
+        {
+            Debug.LogWarning($"   ⚠️ BattleArenaManager.Instance가 이미 존재합니다! (기존: {Instance.gameObject.name}, 새: {gameObject.name})");
+            Debug.LogWarning($"   ⚠️ 이 오브젝트 파괴: {gameObject.name}");
             Destroy(gameObject);
+        }
     }
-    
+
+    void OnEnable()
+    {
+        Debug.Log($"🟢 BattleArenaManager.OnEnable() (isServer={isServer}, isClient={isClient})");
+    }
+
+    void OnDisable()
+    {
+        Debug.Log($"🔴 BattleArenaManager.OnDisable() (isServer={isServer}, isClient={isClient})");
+        Debug.Log($"   호출 스택:\n{System.Environment.StackTrace}");
+    }
+
     void Start()
     {
-        battleCanvas?.gameObject.SetActive(false);
+        Debug.Log($"🔧 BattleArenaManager.Start() (isServer={isServer}, isClient={isClient})");
+
+        if (battleCanvas != null)
+        {
+            battleCanvas.gameObject.SetActive(false);
+            Debug.Log("   ✅ BattleCanvas 비활성화");
+        }
+        else
+        {
+            Debug.LogWarning("   ⚠️ battleCanvas가 null입니다!");
+        }
+
+        // NetworkIdentity 상태 확인
+        if (netIdentity != null)
+        {
+            Debug.Log($"   - NetworkIdentity: sceneId={netIdentity.sceneId}, netId={netIdentity.netId}");
+        }
+        else
+        {
+            Debug.LogError("   ❌ NetworkIdentity가 null입니다!");
+        }
+    }
+
+    void Update()
+    {
+        // 첫 1초 동안만 로그 (스팸 방지)
+        if (Time.time < 1f && Time.frameCount % 60 == 0)
+        {
+            Debug.Log($"⏱️ BattleArenaManager.Update() - isServer={isServer}, isClient={isClient}, Frame={Time.frameCount}");
+        }
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        Debug.Log($"🌐 BattleArenaManager.OnStartServer() - netId={netIdentity.netId}, sceneId={netIdentity.sceneId}");
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        Debug.Log($"🌐 BattleArenaManager.OnStartClient() - netId={netIdentity.netId}, sceneId={netIdentity.sceneId}");
+        Debug.Log($"   - Instance == this? {Instance == this}");
+        Debug.Log($"   - isServer={isServer}, isClient={isClient}, isLocalPlayer={isLocalPlayer}");
     }
     
     /// <summary>
@@ -54,15 +120,20 @@ public class BattleArenaManager : NetworkBehaviour
     public void StartBattle(Mirror.Examples.MultipleMatch.MatchController controller)
     {
         matchController = controller;
-        
-        Debug.Log("🥊 BattleArenaManager: 전투 시작!");
-        
+
+        Debug.Log("🥊 [Server] BattleArenaManager: 전투 시작!");
+        Debug.Log($"   - NetworkIdentity: {(netIdentity != null ? $"netId={netIdentity.netId}, sceneId={netIdentity.sceneId}" : "NULL")}");
+        Debug.Log($"   - isServer: {isServer}, isClient: {isClient}");
+
         // Round 1 시작
         currentRound = 1;
         playerAWins = 0;
         playerBWins = 0;
-        
+
+        Debug.Log("   - RpcShowBattleArena() 호출 중...");
         RpcShowBattleArena();
+
+        Debug.Log("   - StartRound(1) 시작...");
         StartCoroutine(StartRound(1));
     }
     
@@ -72,11 +143,18 @@ public class BattleArenaManager : NetworkBehaviour
     [ClientRpc]
     void RpcShowBattleArena()
     {
+        Debug.Log($"🎬 [Client] RpcShowBattleArena 실행! (isServer={isServer}, isClient={isClient})");
+
         if (battleCanvas != null)
         {
             battleCanvas.gameObject.SetActive(true);
+            Debug.Log("   ✅ BattleCanvas 활성화");
         }
-        
+        else
+        {
+            Debug.LogWarning("   ⚠️ battleCanvas가 null입니다!");
+        }
+
         // 메인 카메라를 전투 위치로 이동
         Camera mainCamera = Camera.main;
         if (mainCamera != null)
@@ -84,10 +162,14 @@ public class BattleArenaManager : NetworkBehaviour
             // 카메라를 아레나 중앙 위에서 내려다보도록 설정
             mainCamera.transform.position = new Vector3(0, 10, -5);
             mainCamera.transform.rotation = Quaternion.Euler(60, 0, 0);
-            Debug.Log($"📷 메인 카메라 이동: {mainCamera.transform.position}");
+            Debug.Log($"   📷 메인 카메라 이동: {mainCamera.transform.position}");
         }
-        
-        Debug.Log("🎬 전투 아레나 활성화");
+        else
+        {
+            Debug.LogWarning("   ⚠️ Main Camera를 찾을 수 없습니다!");
+        }
+
+        Debug.Log("🎬 전투 아레나 활성화 완료");
     }
     
     /// <summary>
@@ -173,18 +255,24 @@ public class BattleArenaManager : NetworkBehaviour
     [Server]
     void SpawnCharacters(CardElement playerACard, CardElement playerBCard, int round)
     {
-        // Player A 캐릭터 스폰
+        // Player A 캐릭터 스폰 (TeamA = Layer 24)
         Vector3 spawnPosA = playerASpawnPoint != null ? playerASpawnPoint.position : new Vector3(-3, 0, 0);
         currentPlayerACharacter = Instantiate(defaultCharacterPrefab, spawnPosA, Quaternion.Euler(0, 90, 0));
-        
-        // 디버그: 스폰 위치 확인
-        Debug.Log($"🔹 Player A 스폰 위치: {spawnPosA}");
-        
+
         NetworkServer.Spawn(currentPlayerACharacter);
-        
+
+        // 🔴 Player A: Layer 24 (TeamA)로 변경 (서버 + 클라이언트)
+        SetLayerRecursively(currentPlayerACharacter, 24);
+        var netIdentityA = currentPlayerACharacter.GetComponent<NetworkIdentity>();
+        if (netIdentityA != null)
+        {
+            RpcSetLayerRecursively(netIdentityA.netId, 24);
+        }
+        Debug.Log($"🔴 Player A 레이어를 24 (TeamA)로 설정");
+
         // 모든 Renderer 활성화 (중요!)
         ActivateAllRenderers(currentPlayerACharacter, "Player A");
-        
+
         playerAController = currentPlayerACharacter.GetComponent<BattleCharacterController>();
         if (playerAController != null)
         {
@@ -194,26 +282,32 @@ public class BattleArenaManager : NetworkBehaviour
         {
             Debug.LogError("❌ Player A: BattleCharacterController를 찾을 수 없습니다!");
         }
-        
+
         // AI Character 설정 (MoreMountains)
         var characterA = currentPlayerACharacter.GetComponent("Character");
         if (characterA != null)
         {
             Debug.Log("✅ Player A Character 컴포넌트 발견 (MoreMountains)");
         }
-        
-        // Player B 캐릭터 스폰
+
+        // Player B 캐릭터 스폰 (TeamB = Layer 25)
         Vector3 spawnPosB = playerBSpawnPoint != null ? playerBSpawnPoint.position : new Vector3(3, 0, 0);
         currentPlayerBCharacter = Instantiate(defaultCharacterPrefab, spawnPosB, Quaternion.Euler(0, -90, 0));
-        
-        // 디버그: 스폰 위치 확인
-        Debug.Log($"🔹 Player B 스폰 위치: {spawnPosB}");
-        
+
         NetworkServer.Spawn(currentPlayerBCharacter);
-        
+
+        // 🔵 Player B: Layer 25 (TeamB) 유지 (이미 프리팹 기본값)
+        SetLayerRecursively(currentPlayerBCharacter, 25);
+        var netIdentityB = currentPlayerBCharacter.GetComponent<NetworkIdentity>();
+        if (netIdentityB != null)
+        {
+            RpcSetLayerRecursively(netIdentityB.netId, 25);
+        }
+        Debug.Log($"🔵 Player B 레이어를 25 (TeamB)로 설정");
+
         // 모든 Renderer 활성화 (중요!)
         ActivateAllRenderers(currentPlayerBCharacter, "Player B");
-        
+
         playerBController = currentPlayerBCharacter.GetComponent<BattleCharacterController>();
         if (playerBController != null)
         {
@@ -223,27 +317,237 @@ public class BattleArenaManager : NetworkBehaviour
         {
             Debug.LogError("❌ Player B: BattleCharacterController를 찾을 수 없습니다!");
         }
-        
+
         // AI Character 설정 (MoreMountains)
         var characterB = currentPlayerBCharacter.GetComponent("Character");
         if (characterB != null)
         {
             Debug.Log("✅ Player B Character 컴포넌트 발견 (MoreMountains)");
         }
-        
-        // AI 서로를 타겟으로 설정 (필요시 - Reflection으로 구현 가능)
-        // var characterA = currentPlayerACharacter.GetComponent("Character");
-        // if (characterA != null) {
-        //     var setTargetMethod = characterA.GetType().GetMethod("SetTarget");
-        //     setTargetMethod?.Invoke(characterA, new object[] { currentPlayerBCharacter.transform });
-        // }
-        
+
+        // AIBrain 타겟 레이어 마스크 확인 및 설정
+        CheckAIBrainSettings(currentPlayerACharacter, "Player A");
+        CheckAIBrainSettings(currentPlayerBCharacter, "Player B");
+
+        // 추가 디버그: GameObject 계층 구조 출력
+        Debug.Log($"📦 Player A 계층 구조:");
+        PrintHierarchy(currentPlayerACharacter.transform, 0, 2);
+        Debug.Log($"📦 Player B 계층 구조:");
+        PrintHierarchy(currentPlayerBCharacter.transform, 0, 2);
+
         Debug.Log($"✅ 캐릭터 스폰: {playerACard.name.text} vs {playerBCard.name.text}");
-        Debug.Log($"📍 스폰된 오브젝트: A={currentPlayerACharacter.name} at {currentPlayerACharacter.transform.position}");
-        Debug.Log($"📍 스폰된 오브젝트: B={currentPlayerBCharacter.name} at {currentPlayerBCharacter.transform.position}");
-        
+        Debug.Log($"📍 스폰된 오브젝트: A={currentPlayerACharacter.name} at {currentPlayerACharacter.transform.position} (Layer {currentPlayerACharacter.layer})");
+        Debug.Log($"📍 스폰된 오브젝트: B={currentPlayerBCharacter.name} at {currentPlayerBCharacter.transform.position} (Layer {currentPlayerBCharacter.layer})");
+
         // 디버그: 스폰 위치에 Sphere 그리기 (Gizmo)
         RpcDrawDebugMarkers(spawnPosA, spawnPosB);
+    }
+
+    /// <summary>
+    /// GameObject와 모든 자식의 레이어를 재귀적으로 변경 (서버)
+    /// </summary>
+    [Server]
+    void SetLayerRecursively(GameObject obj, int layer)
+    {
+        if (obj == null) return;
+
+        obj.layer = layer;
+
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
+    /// <summary>
+    /// GameObject와 모든 자식의 레이어를 재귀적으로 변경 (클라이언트 RPC)
+    /// </summary>
+    [ClientRpc]
+    void RpcSetLayerRecursively(uint netId, int layer)
+    {
+        // netId로 NetworkIdentity 찾기
+        if (NetworkClient.spawned.TryGetValue(netId, out NetworkIdentity identity))
+        {
+            GameObject obj = identity.gameObject;
+
+            if (obj == null)
+            {
+                Debug.LogError($"[Client] netId={netId}의 GameObject가 null입니다!");
+                return;
+            }
+
+            // 재귀적으로 레이어 변경
+            SetLayerRecursivelyLocal(obj, layer);
+
+            Debug.Log($"[Client] 레이어 변경: {obj.name} → Layer {layer}");
+        }
+        else
+        {
+            Debug.LogError($"[Client] netId={netId}를 가진 NetworkIdentity를 찾을 수 없습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 재귀 헬퍼 (로컬, 서버/클라이언트 공용)
+    /// </summary>
+    void SetLayerRecursivelyLocal(GameObject obj, int layer)
+    {
+        if (obj == null) return;
+
+        obj.layer = layer;
+
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursivelyLocal(child.gameObject, layer);
+        }
+    }
+
+    /// <summary>
+    /// AIBrain 설정 확인 및 수정
+    /// </summary>
+    [Server]
+    void CheckAIBrainSettings(GameObject character, string playerName)
+    {
+        if (character == null) return;
+
+        // AIBrain 찾기 (자식 오브젝트에 있을 수 있음)
+        MonoBehaviour aiBrain = null;
+
+        foreach (var brain in character.GetComponentsInChildren<MonoBehaviour>())
+        {
+            if (brain.GetType().Name == "AIBrain")
+            {
+                aiBrain = brain;
+                break;
+            }
+        }
+
+        if (aiBrain != null)
+        {
+            Debug.Log($"✅ {playerName}: AIBrain 발견");
+
+            // 타겟 레이어 마스크 설정 (상대 팀을 탐지하도록)
+            int targetLayer = character.layer == 24 ? 25 : 24; // Player A는 Layer 25 탐지, Player B는 Layer 24 탐지
+            SetAIBrainTargetLayer(aiBrain, targetLayer, playerName);
+
+            // Reflection으로 Target 속성 확인
+            var targetProp = aiBrain.GetType().GetProperty("Target");
+            if (targetProp != null)
+            {
+                var targetValue = targetProp.GetValue(aiBrain);
+                Debug.Log($"   - Target: {(targetValue == null ? "null" : targetValue.ToString())}");
+            }
+
+            // BrainActive 확인
+            var brainActiveProp = aiBrain.GetType().GetProperty("BrainActive");
+            if (brainActiveProp != null)
+            {
+                var isActive = brainActiveProp.GetValue(aiBrain);
+                Debug.Log($"   - BrainActive: {isActive}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ {playerName}: AIBrain을 찾을 수 없습니다!");
+        }
+    }
+
+    /// <summary>
+    /// AIBrain의 모든 Decision에서 TargetLayerMask 설정
+    /// </summary>
+    [Server]
+    void SetAIBrainTargetLayer(MonoBehaviour aiBrain, int targetLayer, string playerName)
+    {
+        try
+        {
+            int changedCount = 0;
+            LayerMask newMask = 1 << targetLayer;
+
+            Debug.Log($"   🔍 {playerName}: TargetLayer를 {targetLayer}로 변경 시도 (LayerMask={newMask.value})");
+
+            // 방법 1: AIBrain GameObject의 모든 자식에서 Decision 컴포넌트 찾기
+            GameObject aiBrainObj = aiBrain.gameObject;
+            var allDecisions = aiBrainObj.GetComponentsInChildren<MonoBehaviour>();
+
+            foreach (var component in allDecisions)
+            {
+                if (component == null) continue;
+
+                string typeName = component.GetType().Name;
+
+                // Decision으로 끝나는 모든 컴포넌트 확인
+                if (typeName.Contains("Decision"))
+                {
+                    // TargetLayerMask 필드 찾기
+                    var targetLayerMaskField = component.GetType().GetField("TargetLayerMask");
+                    if (targetLayerMaskField != null)
+                    {
+                        var currentValue = targetLayerMaskField.GetValue(component);
+                        targetLayerMaskField.SetValue(component, newMask);
+                        changedCount++;
+
+                        Debug.Log($"      ✅ {typeName}: TargetLayerMask 변경 ({currentValue} → {newMask.value})");
+                    }
+                }
+            }
+
+            // 방법 2: States를 통한 설정 (추가 보장)
+            var statesField = aiBrain.GetType().GetField("States");
+            if (statesField != null)
+            {
+                var states = statesField.GetValue(aiBrain);
+                if (states != null)
+                {
+                    var statesList = states as System.Collections.IList;
+                    if (statesList != null)
+                    {
+                        foreach (var state in statesList)
+                        {
+                            // Transitions 확인
+                            var transitionsField = state.GetType().GetField("Transitions");
+                            if (transitionsField != null)
+                            {
+                                var transitions = transitionsField.GetValue(state);
+                                var transitionsList = transitions as System.Collections.IList;
+
+                                if (transitionsList != null)
+                                {
+                                    foreach (var transition in transitionsList)
+                                    {
+                                        var decisionField = transition.GetType().GetField("Decision");
+                                        if (decisionField != null)
+                                        {
+                                            var decision = decisionField.GetValue(transition);
+                                            if (decision != null)
+                                            {
+                                                var targetLayerMaskField = decision.GetType().GetField("TargetLayerMask");
+                                                if (targetLayerMaskField != null)
+                                                {
+                                                    targetLayerMaskField.SetValue(decision, newMask);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (changedCount > 0)
+            {
+                Debug.Log($"   🎯 {playerName}: TargetLayerMask를 Layer {targetLayer}로 설정 완료 ({changedCount}개 Decision 수정)");
+            }
+            else
+            {
+                Debug.LogWarning($"   ⚠️ {playerName}: TargetLayerMask를 가진 Decision을 찾지 못했습니다!");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"❌ {playerName}: AIBrain TargetLayerMask 설정 실패: {e.Message}\n{e.StackTrace}");
+        }
     }
     
     /// <summary>
@@ -253,17 +557,17 @@ public class BattleArenaManager : NetworkBehaviour
     void ActivateAllRenderers(GameObject character, string playerName)
     {
         if (character == null) return;
-        
+
         // 모든 하위 GameObject 활성화
         foreach (Transform child in character.GetComponentsInChildren<Transform>(true))
         {
             child.gameObject.SetActive(true);
         }
-        
+
         // 모든 Renderer 활성화
         var renderers = character.GetComponentsInChildren<Renderer>(true);
         int activatedCount = 0;
-        
+
         foreach (var renderer in renderers)
         {
             if (!renderer.enabled)
@@ -273,35 +577,64 @@ public class BattleArenaManager : NetworkBehaviour
                 Debug.Log($"🎨 {playerName}: Renderer 활성화 - {renderer.gameObject.name}");
             }
         }
-        
+
         Debug.Log($"✅ {playerName}: 총 {activatedCount}개 Renderer 활성화 (전체 {renderers.Length}개)");
-        
-        // RPC로 클라이언트에도 전파
-        RpcActivateRenderers(character);
+
+        // NetworkIdentity 가져오기
+        var netIdentity = character.GetComponent<NetworkIdentity>();
+        if (netIdentity != null)
+        {
+            // RPC로 클라이언트에도 전파 (netId 사용)
+            RpcActivateRenderers(netIdentity.netId);
+        }
+        else
+        {
+            Debug.LogError($"❌ {playerName}: NetworkIdentity가 없습니다!");
+        }
     }
-    
+
     /// <summary>
     /// 클라이언트에서도 Renderer 활성화
     /// </summary>
     [ClientRpc]
-    void RpcActivateRenderers(GameObject character)
+    void RpcActivateRenderers(uint netId)
     {
-        if (character == null) return;
-        
-        // 모든 하위 GameObject 활성화
-        foreach (Transform child in character.GetComponentsInChildren<Transform>(true))
+        // netId로 NetworkIdentity 찾기
+        if (NetworkClient.spawned.TryGetValue(netId, out NetworkIdentity identity))
         {
-            child.gameObject.SetActive(true);
+            GameObject character = identity.gameObject;
+
+            if (character == null)
+            {
+                Debug.LogError($"[Client] netId={netId}의 GameObject가 null입니다!");
+                return;
+            }
+
+            // 모든 하위 GameObject 활성화
+            foreach (Transform child in character.GetComponentsInChildren<Transform>(true))
+            {
+                child.gameObject.SetActive(true);
+            }
+
+            // 모든 Renderer 활성화
+            var renderers = character.GetComponentsInChildren<Renderer>(true);
+            int activatedCount = 0;
+
+            foreach (var renderer in renderers)
+            {
+                if (!renderer.enabled)
+                {
+                    renderer.enabled = true;
+                    activatedCount++;
+                }
+            }
+
+            Debug.Log($"[Client] 캐릭터 Renderer 활성화: {character.name} ({activatedCount}개 활성화)");
         }
-        
-        // 모든 Renderer 활성화
-        var renderers = character.GetComponentsInChildren<Renderer>(true);
-        foreach (var renderer in renderers)
+        else
         {
-            renderer.enabled = true;
+            Debug.LogError($"[Client] netId={netId}를 가진 NetworkIdentity를 찾을 수 없습니다!");
         }
-        
-        Debug.Log($"[Client] 캐릭터 Renderer 활성화: {character.name}");
     }
     
     /// <summary>
@@ -570,6 +903,36 @@ public class BattleArenaManager : NetworkBehaviour
         if (resultText != null)
         {
             resultText.text = text;
+        }
+    }
+
+    /// <summary>
+    /// GameObject 계층 구조 출력 (디버그용)
+    /// </summary>
+    void PrintHierarchy(Transform parent, int depth, int maxDepth)
+    {
+        if (depth > maxDepth) return;
+
+        string indent = new string(' ', depth * 2);
+        string layerInfo = $"(Layer {parent.gameObject.layer})";
+
+        // AIBrain이 있는지 확인
+        bool hasAIBrain = false;
+        foreach (var comp in parent.GetComponents<MonoBehaviour>())
+        {
+            if (comp != null && comp.GetType().Name == "AIBrain")
+            {
+                hasAIBrain = true;
+                break;
+            }
+        }
+
+        string brainMarker = hasAIBrain ? " 🧠 AIBrain" : "";
+        Debug.Log($"{indent}├─ {parent.name} {layerInfo}{brainMarker}");
+
+        foreach (Transform child in parent)
+        {
+            PrintHierarchy(child, depth + 1, maxDepth);
         }
     }
 }

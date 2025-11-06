@@ -521,6 +521,11 @@ namespace Mirror.Examples.MultipleMatch
             if (player1OrderSubmitted && player2OrderSubmitted)
             {
                 Debug.Log("✅ 양쪽 플레이어 모두 전투 순서 제출 완료!");
+
+                // 서버에서 전투 시작 (캐릭터 스폰)
+                ServerStartBattle();
+
+                // 클라이언트들에게 전투 시작 알림 (UI 변경)
                 RpcStartBattle();
             }
         }
@@ -541,34 +546,55 @@ namespace Mirror.Examples.MultipleMatch
         }
 
         /// <summary>
-        /// 양쪽 플레이어 모두 준비 완료 - 전투 시작
+        /// 서버에서 실제 전투 시작 (캐릭터 스폰)
+        /// </summary>
+        [Server]
+        void ServerStartBattle()
+        {
+            Debug.Log("🎮 [Server] ServerStartBattle() 시작!");
+            Debug.Log($"   - Player A 전투 순서: [{player1BattleOrder[0]}, {player1BattleOrder[1]}, {player1BattleOrder[2]}]");
+            Debug.Log($"   - Player B 전투 순서: [{player2BattleOrder[0]}, {player2BattleOrder[1]}, {player2BattleOrder[2]}]");
+
+            // BattleArenaManager 찾기
+            Debug.Log($"   - BattleArenaManager.Instance: {(BattleArenaManager.Instance != null ? "존재" : "NULL")}");
+
+            if (BattleArenaManager.Instance != null)
+            {
+                Debug.Log("   ✅ BattleArenaManager.Instance.StartBattle() 호출 중...");
+                BattleArenaManager.Instance.StartBattle(this);
+            }
+            else
+            {
+                Debug.LogError("❌ BattleArenaManager.Instance를 찾을 수 없습니다!");
+                Debug.LogError("   Scene에서 BattleArenaManager GameObject를 찾아봅니다...");
+
+                // 직접 찾기 시도
+                var manager = FindObjectOfType<BattleArenaManager>();
+                if (manager != null)
+                {
+                    Debug.LogWarning($"⚠️ FindObjectOfType으로 발견! (Instance가 설정되지 않았음)");
+                    BattleArenaManager.Instance = manager;
+                    manager.StartBattle(this);
+                }
+                else
+                {
+                    Debug.LogError("❌ Scene에 BattleArenaManager GameObject가 없습니다! Hierarchy를 확인하세요.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 클라이언트에게 전투 시작 알림 (UI 변경)
         /// </summary>
         [ClientRpc]
         void RpcStartBattle()
         {
-            Debug.Log("⚔️ 전투 시작!");
-            
-            // 전투 순서 UI 숨기기
+            Debug.Log("⚔️ 전투 시작! (Client)");
+
+            // 전투 순서 UI 숨기기 (모든 클라이언트)
             if (BattleOrderUI.Instance != null)
             {
                 BattleOrderUI.Instance.HideOrderSetupUI();
-            }
-            
-            // 서버에서 전투 순서 로그 출력 및 전투 시작
-            if (isServer)
-            {
-                Debug.Log($"🔹 Player A 전투 순서: [{player1BattleOrder[0]}, {player1BattleOrder[1]}, {player1BattleOrder[2]}]");
-                Debug.Log($"🔹 Player B 전투 순서: [{player2BattleOrder[0]}, {player2BattleOrder[1]}, {player2BattleOrder[2]}]");
-                
-                // BattleArenaManager로 전투 시작
-                if (BattleArenaManager.Instance != null)
-                {
-                    BattleArenaManager.Instance.StartBattle(this);
-                }
-                else
-                {
-                    Debug.LogWarning("⚠️ BattleArenaManager.Instance를 찾을 수 없습니다! Scene에 BattleArenaManager를 추가하세요.");
-                }
             }
         }
 
