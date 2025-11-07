@@ -41,10 +41,10 @@ public class BattleArenaManager : NetworkBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("   ✅ BattleArenaManager.Instance 설정 완료");
+            Debug.Log("   ✅ BattleArenaManager.Instance 설정 완료 (동적 생성)");
 
-            // DontDestroyOnLoad 제거 (Scene Object이므로 불필요)
-            // 씬 전환 시 자동으로 파괴되도록 함
+            // 참고: 이제 Prefab으로 동적 생성되므로 sceneId는 0입니다.
+            // MatchController가 전투 종료 시 파괴 담당
         }
         else
         {
@@ -96,6 +96,20 @@ public class BattleArenaManager : NetworkBehaviour
         if (Time.time < 1f && Time.frameCount % 60 == 0)
         {
             Debug.Log($"⏱️ BattleArenaManager.Update() - isServer={isServer}, isClient={isClient}, Frame={Time.frameCount}");
+        }
+
+        // 캐릭터 위치 디버그 (2초마다, 10초 동안만)
+        if (Time.frameCount % 120 == 0 && Time.time < 10f)
+        {
+            string side = isServer ? "Server" : "Client";
+            if (currentPlayerACharacter != null)
+            {
+                Debug.Log($"📍 [{side}] Player A 위치: {currentPlayerACharacter.transform.position}");
+            }
+            if (currentPlayerBCharacter != null)
+            {
+                Debug.Log($"📍 [{side}] Player B 위치: {currentPlayerBCharacter.transform.position}");
+            }
         }
     }
 
@@ -259,6 +273,9 @@ public class BattleArenaManager : NetworkBehaviour
         Vector3 spawnPosA = playerASpawnPoint != null ? playerASpawnPoint.position : new Vector3(-3, 0, 0);
         currentPlayerACharacter = Instantiate(defaultCharacterPrefab, spawnPosA, Quaternion.Euler(0, 90, 0));
 
+        // 🔑 matchId 설정 (Prefab에 NetworkMatch가 미리 있어야 함)
+        SetMatchId(currentPlayerACharacter, "Player A");
+
         NetworkServer.Spawn(currentPlayerACharacter);
 
         // 🔴 Player A: Layer 24 (TeamA)로 변경 (서버 + 클라이언트)
@@ -293,6 +310,9 @@ public class BattleArenaManager : NetworkBehaviour
         // Player B 캐릭터 스폰 (TeamB = Layer 25)
         Vector3 spawnPosB = playerBSpawnPoint != null ? playerBSpawnPoint.position : new Vector3(3, 0, 0);
         currentPlayerBCharacter = Instantiate(defaultCharacterPrefab, spawnPosB, Quaternion.Euler(0, -90, 0));
+
+        // 🔑 matchId 설정 (Prefab에 NetworkMatch가 미리 있어야 함)
+        SetMatchId(currentPlayerBCharacter, "Player B");
 
         NetworkServer.Spawn(currentPlayerBCharacter);
 
@@ -341,6 +361,16 @@ public class BattleArenaManager : NetworkBehaviour
 
         // 디버그: 스폰 위치에 Sphere 그리기 (Gizmo)
         RpcDrawDebugMarkers(spawnPosA, spawnPosB);
+
+        // 🔑 중요: 클라이언트에서 AI 비활성화 (서버만 AI 제어)
+        if (netIdentityA != null)
+        {
+            RpcDisableAIOnClient(netIdentityA.netId);
+        }
+        if (netIdentityB != null)
+        {
+            RpcDisableAIOnClient(netIdentityB.netId);
+        }
     }
 
     /// <summary>
@@ -933,6 +963,91 @@ public class BattleArenaManager : NetworkBehaviour
         foreach (Transform child in parent)
         {
             PrintHierarchy(child, depth + 1, maxDepth);
+        }
+    }
+
+    /// <summary>
+    /// NetworkMatch matchId 설정 (Prefab에 NetworkMatch가 미리 있어야 함)
+    /// </summary>
+    [Server]
+    void SetMatchId(GameObject obj, string playerName)
+    {
+        if (obj == null || matchController == null) return;
+
+        // MatchController의 matchId 가져오기
+        var controllerMatch = matchController.GetComponent<Mirror.NetworkMatch>();
+        if (controllerMatch == null)
+        {
+            Debug.LogError($"❌ {playerName}: MatchController에 NetworkMatch가 없습니다!");
+            return;
+        }
+
+        // 캐릭터의 NetworkMatch 가져오기
+        var characterMatch = obj.GetComponent<Mirror.NetworkMatch>();
+        if (characterMatch == null)
+        {
+            Debug.LogError($"❌ {playerName}: Character01 Prefab에 NetworkMatch 컴포넌트가 없습니다!");
+            Debug.LogError($"   → Unity 에디터에서 Character01.prefab에 NetworkMatch 추가 필요");
+            return;
+        }
+
+        // matchId 설정 (Prefab에 있으므로 Spawn 전에도 안전)
+        characterMatch.matchId = controllerMatch.matchId;
+        Debug.Log($"   🔑 {playerName} matchId 설정: {controllerMatch.matchId}");
+    }
+
+    /// <summary>
+    /// 클라이언트에서 AI 비활성화 (서버만 AI 제어)
+    /// </summary>
+    [ClientRpc]
+    void RpcDisableAIOnClient(uint netId)
+    {
+        // 서버에서는 AI가 작동해야 하므로 건너뜀
+        if (isServer)
+        {
+            Debug.Log($"[Server] AI 유지 (서버는 AI 제어) - netId={netId}");
+            return;
+        }
+
+        // netId로 NetworkIdentity 찾기
+        if (NetworkClient.spawned.TryGetValue(netId, out NetworkIdentity identity))
+        {
+            GameObject character = identity.gameObject;
+
+            // 모든 AI 관련 컴포넌트 비활성화
+            foreach (var component in character.GetComponentsInChildren<MonoBehaviour>())
+            {
+                if (component == null) continue;
+
+                string componentName = component.GetType().Name;
+
+                // AIBrain 비활성화
+                if (componentName == "AIBrain")
+                {
+                    component.enabled = false;
+                    Debug.Log($"[Client] AIBrain 비활성화: {character.name}");
+                }
+                // 무기 관련 AI Action 비활성화 (NullReferenceException 방지)
+                else if (componentName == "AIActionShoot3D" || componentName == "AIActionAimWeaponAtMovement")
+                {
+                    component.enabled = false;
+                    Debug.Log($"[Client] {componentName} 비활성화: {character.name}");
+                }
+            }
+
+            // Character 컴포넌트 비활성화 (MoreMountains)
+            var characterComponent = character.GetComponent("Character");
+            if (characterComponent != null && characterComponent is MonoBehaviour charBehaviour)
+            {
+                charBehaviour.enabled = false;
+                Debug.Log($"[Client] Character 컴포넌트 비활성화: {character.name}");
+            }
+
+            Debug.Log($"✅ [Client] AI 비활성화 완료: {character.name} (서버에서만 AI 제어)");
+        }
+        else
+        {
+            Debug.LogError($"❌ [Client] netId={netId}를 가진 캐릭터를 찾을 수 없습니다!");
         }
     }
 }

@@ -49,6 +49,9 @@ namespace Mirror.Examples.MultipleMatch
         public Text winCountOpponent;
         public GameObject Panels;
 
+        [Header("Battle Arena")]
+        public GameObject battleArenaManagerPrefab;
+
         [Header("Diagnostics")]
         [ReadOnly, SerializeField] internal CanvasController canvasController;
         [ReadOnly, SerializeField] internal NetworkIdentity player1;
@@ -555,30 +558,62 @@ namespace Mirror.Examples.MultipleMatch
             Debug.Log($"   - Player A 전투 순서: [{player1BattleOrder[0]}, {player1BattleOrder[1]}, {player1BattleOrder[2]}]");
             Debug.Log($"   - Player B 전투 순서: [{player2BattleOrder[0]}, {player2BattleOrder[1]}, {player2BattleOrder[2]}]");
 
-            // BattleArenaManager 찾기
-            Debug.Log($"   - BattleArenaManager.Instance: {(BattleArenaManager.Instance != null ? "존재" : "NULL")}");
-
-            if (BattleArenaManager.Instance != null)
+            // BattleArenaManager 동적 생성 (Prefab으로)
+            if (battleArenaManagerPrefab != null)
             {
-                Debug.Log("   ✅ BattleArenaManager.Instance.StartBattle() 호출 중...");
-                BattleArenaManager.Instance.StartBattle(this);
-            }
-            else
-            {
-                Debug.LogError("❌ BattleArenaManager.Instance를 찾을 수 없습니다!");
-                Debug.LogError("   Scene에서 BattleArenaManager GameObject를 찾아봅니다...");
+                Debug.Log("   🏗️ BattleArenaManager Prefab에서 생성 중...");
 
-                // 직접 찾기 시도
-                var manager = FindObjectOfType<BattleArenaManager>();
+                GameObject arenaObj = Instantiate(battleArenaManagerPrefab);
+
+                // 🔑 중요: matchId 설정 (Prefab에 NetworkMatch가 미리 있어야 함)
+                NetworkMatch networkMatch = arenaObj.GetComponent<NetworkMatch>();
+                NetworkMatch myMatch = GetComponent<NetworkMatch>();
+
+                if (networkMatch == null)
+                {
+                    Debug.LogError("   ❌ BattleArenaManager Prefab에 NetworkMatch 컴포넌트가 없습니다!");
+                    Debug.LogError("   → Unity 에디터에서 BattleArenaManager.prefab에 NetworkMatch 추가 필요");
+                }
+                else if (myMatch == null)
+                {
+                    Debug.LogError("   ❌ MatchController에 NetworkMatch가 없습니다!");
+                }
+                else
+                {
+                    // Spawn 전에 matchId 설정 (Prefab에 있으므로 안전)
+                    networkMatch.matchId = myMatch.matchId;
+                    Debug.Log($"   🔑 BattleArenaManager matchId 설정: {myMatch.matchId}");
+                }
+
+                // Spawn
+                NetworkServer.Spawn(arenaObj);
+
+                BattleArenaManager manager = arenaObj.GetComponent<BattleArenaManager>();
                 if (manager != null)
                 {
-                    Debug.LogWarning($"⚠️ FindObjectOfType으로 발견! (Instance가 설정되지 않았음)");
-                    BattleArenaManager.Instance = manager;
+                    Debug.Log("   ✅ BattleArenaManager 생성 완료! StartBattle() 호출 중...");
                     manager.StartBattle(this);
                 }
                 else
                 {
-                    Debug.LogError("❌ Scene에 BattleArenaManager GameObject가 없습니다! Hierarchy를 확인하세요.");
+                    Debug.LogError("❌ BattleArenaManager 컴포넌트를 찾을 수 없습니다!");
+                }
+            }
+            else
+            {
+                Debug.LogError("❌ battleArenaManagerPrefab이 할당되지 않았습니다!");
+                Debug.LogError("   Scene에서 BattleArenaManager를 찾아봅니다...");
+
+                // Fallback: 씬에서 찾기
+                var manager = FindObjectOfType<BattleArenaManager>();
+                if (manager != null)
+                {
+                    Debug.LogWarning($"⚠️ Scene에서 발견! (Prefab 사용 권장)");
+                    manager.StartBattle(this);
+                }
+                else
+                {
+                    Debug.LogError("❌ BattleArenaManager를 찾을 수 없습니다!");
                 }
             }
         }

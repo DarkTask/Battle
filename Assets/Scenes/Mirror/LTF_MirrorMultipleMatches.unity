@@ -1743,6 +1743,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1182068805014700, guid: 9edcf7e494cf3e640b18cb7495fb179a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1311006561362000, guid: 9edcf7e494cf3e640b18cb7495fb179a, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -1881,6 +1885,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.z
       value: -37.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6513076272023696034, guid: 9edcf7e494cf3e640b18cb7495fb179a,
+        type: 3}
+      propertyPath: m_StreamingVersion
+      value: 20241001
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2327,81 +2336,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 5, y: 20, z: 90}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &604695141
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 604695144}
-  - component: {fileID: 604695143}
-  - component: {fileID: 604695142}
-  m_Layer: 0
-  m_Name: BattleArenaManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &604695142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604695141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
-  sceneId: 2916239781
-  _assetId: 0
-  serverOnly: 0
-  visibility: 0
-  hasSpawned: 0
---- !u!114 &604695143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604695141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1df0d3aee7b231148ac07961aa984819, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BattleArenaManager
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  playerASpawnPoint: {fileID: 2093003641}
-  playerBSpawnPoint: {fileID: 1941495217}
-  defaultCharacterPrefab: {fileID: 2503324192394291754, guid: 85e9d85b212da8947b2172dcb71d0993,
-    type: 3}
-  currentRound: 0
-  playerAWins: 0
-  playerBWins: 0
-  battleCanvas: {fileID: 647925905}
-  roundText: {fileID: 1253475028}
-  resultText: {fileID: 90050976}
---- !u!4 &604695144
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604695141}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 594.6195, y: 416.88, z: 106.85916}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &616631237
 GameObject:
   m_ObjectHideFlags: 0
@@ -3572,6 +3506,7 @@ MonoBehaviour:
   spawnPrefabs:
   - {fileID: 2503324192394291754, guid: 85e9d85b212da8947b2172dcb71d0993, type: 3}
   - {fileID: 8222659367022836919, guid: 12132225cbee3814cbae2ea6f9db8cf5, type: 3}
+  - {fileID: 2703732640339432581, guid: 509ad70e431013e4a9605d03e57b1cbc, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -8228,7 +8163,6 @@ SceneRoots:
   - {fileID: 616631238}
   - {fileID: 1564030612}
   - {fileID: 1410712760}
-  - {fileID: 604695144}
   - {fileID: 2093003641}
   - {fileID: 1941495217}
   - {fileID: 647925906}
