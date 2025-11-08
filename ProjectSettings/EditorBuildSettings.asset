@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Photon/QuantumMenu/QuantumSampleMenu.unity
+    guid: f23d3edd333e1dc449a4688e04123759
+  - enabled: 1
+    path: Assets/QuantumUser/Scenes/QuantumGameScene.unity
+    guid: 54adeefd7cfb0fe44b677039381f9ac2
+  - enabled: 1
     path: Assets/Scenes/Mirror/LTF_MirrorMultipleMatches.unity
     guid: d6b731d4c169209448ffaea0e76097ed
   - enabled: 0
@@ -143,5 +149,8 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/TopDownEngine/ThirdParty/MoreMountains/MMTools/Demos/MMSceneLoading/MMSceneLoadingDemoSceneB.unity
     guid: 352d34cac2435634fb99618d19a3929c
+  - enabled: 1
+    path: Assets/Photon/QuantumAsteroids.disabled/Scenes/AsteroidsGameplay.unity
+    guid: 3136b9496174b5049b474ae4480bee65
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

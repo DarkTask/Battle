@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s \"C:\\Git\\Battle\\Assets\\QuantumUser\\Simulation\")",
+      "Bash(mkdir:*)",
+      "Bash(bash \"C:\\Git\\Battle\\fix_qlist.sh\")",
+      "Bash(bash \"C:\\Git\\Battle\\fix_qlist_v2.sh\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

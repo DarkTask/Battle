@@ -1,0 +1,76 @@
+// Battle Game DSL Definition
+// 1v1 턴제 배틀 게임
+
+// ===== Input =====
+input {
+    // 캐릭터 선택 페이즈
+    Int32 SelectedChampionId;
+
+    // 전투 순서 지정 페이즈
+    Int32 OrderSlot1;
+    Int32 OrderSlot2;
+    Int32 OrderSlot3;
+    button OrderSubmit;
+}
+
+// ===== Global State =====
+global {
+    Int32 CurrentPhase;
+    Int32 SelectTurn;
+    FP SelectTimer;
+    Int32 CurrentRound;
+    FP BattleTimer;
+    Int32 PlayerAScore;
+    Int32 PlayerBScore;
+}
+
+// ===== Components =====
+
+component PlayerGameData {
+    PlayerRef PlayerRef;
+    list<Int32> SelectedChampions;
+    Int32 SelectedCount;
+    list<Int32> BattleOrder;
+    Boolean OrderSubmitted;
+    Int32 TeamId;
+}
+
+component ChampionStats {
+    Int32 ChampionId;
+    FP Strength;
+    FP Dexterity;
+    FP Constitution;
+    FP MaxHealth;
+    FP AttackPower;
+    FP AttackSpeed;
+    FP MoveSpeed;
+}
+
+component BattleState {
+    FP Health;
+    Boolean IsAlive;
+    Int32 TeamId;
+    Int32 SlotIndex;
+    FP AttackCooldown;
+    EntityRef CurrentTarget;
+}
+
+component SimpleAI {
+    FP SearchRadius;
+    FP AttackRange;
+    FP ThinkTimer;
+}
+
+component SpawnPoint {
+    Int32 TeamId;
+    Int32 SlotIndex;
+}
+
+// ===== Signals =====
+
+signal OnChampionSelected(PlayerRef player, Int32 championId);
+signal OnOrderSubmitted(PlayerRef player);
+signal OnBattleStart(Int32 round);
+signal OnBattleEnd(Int32 winnerTeam);
+signal OnChampionDeath(EntityRef champion);
+signal OnPhaseChanged(Int32 newPhase);
