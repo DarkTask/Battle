@@ -384,37 +384,120 @@ Phase 4: Result
 
 ---
 
+## Unity 에셋 생성 진행 상황 ✅
+
+### 완료된 작업 (2025-11-08):
+
+#### 1. Unity 에셋 생성 ✅
+- ✅ **BattleGameConfig** 에셋 생성
+  - 위치: `Assets/QuantumUser/Resources/DB/Config/BattleGameConfig.asset`
+  - ChampionPrototypes[12] 배열 설정 (Element 0~2에 3개 프로토타입 연결됨)
+  - SpawnPositions[6] 배열 설정 완료
+    - Element 0-2: Player A (-10, 0, 0/2/4)
+    - Element 3-5: Player B (10, 0, 0/2/4)
+  - SelectTimeLimit: 3초
+  - BattleTimeLimit: 60초
+
+- ✅ **ChampionData** 에셋 3개 생성 (테스트용)
+  - `Champion_Warrior`: STR 10, DEX 5, CON 8
+  - `Champion_Archer`: STR 6, DEX 10, CON 5
+  - `Champion_Tank`: STR 7, DEX 3, CON 12
+  - 위치: `Assets/QuantumUser/Resources/DB/Champions/`
+
+#### 2. Entity Prototype 생성 ✅
+- ✅ **ChampionPrototype_Warrior** 생성
+  - Transform3DPrototype
+  - NavMeshPathfinderPrototype
+  - NavMeshSteeringAgentPrototype
+  - NavMeshAvoidanceAgentPrototype
+
+- ✅ **ChampionPrototype_Archer** 생성 (동일 컴포넌트)
+- ✅ **ChampionPrototype_Tank** 생성 (동일 컴포넌트)
+- 위치: `Assets/QuantumUser/Resources/DB/Prototypes/`
+
+#### 3. ChampionData ↔ EntityPrototype 연결 ✅
+- ✅ Champion_Warrior → ChampionPrototype_Warrior
+- ✅ Champion_Archer → ChampionPrototype_Archer
+- ✅ Champion_Tank → ChampionPrototype_Tank
+
+#### 4. 테스트 씬 구성 ✅
+- ✅ **BattleTestScene** 생성
+  - 위치: `Assets/QuantumUser/Scenes/BattleTest/BattleTestScene.unity`
+  - Main Camera, Directional Light 유지
+
+- ✅ **Quantum 오브젝트** 추가 (Add Quantum To Current Scene)
+  - QuantumEntityViewUpdater
+  - QuantumDebugRunner
+  - QuantumMap
+  - QuantumStats
+  - QuantumDebugInput
+
+- ✅ **Ground** (바닥) 생성
+  - 3D Object > Plane
+  - Position: (0, 0, 0)
+  - Scale: (5, 1, 5) - 50x50 크기
+
+#### 5. RuntimeConfig 설정 ✅
+- ✅ **QuantumMapSceneInfo**의 RuntimeConfig에 GameConfig 연결
+  - Game Config: BattleGameConfig 연결 완료
+  - Simulation Config: DefaultConfigSimulation
+  - Systems Config: DefaultConfigSystems
+  - Map: QuantumMap
+
+---
+
 ## 다음 단계 (TODO) 📋
 
-### 1. Unity 에셋 생성
-- [ ] BattleGameConfig 에셋 생성 (Project 창 우클릭 → Create → Quantum → BattleGameConfig)
-  - ChampionPrototypes[12] 배열 설정
-  - SpawnPositions[6] 배열 설정 (A팀: 0,1,2 / B팀: 3,4,5)
+### 내일 할 작업:
 
-- [ ] ChampionData 에셋 12개 생성
-  - 각 챔피언별 Strength/Dexterity/Constitution 설정
-  - Prefab 참조 연결
+#### 1. BattleGameConfig에 ChampionPrototypes 연결
+- [ ] BattleGameConfig 에셋 선택
+- [ ] Inspector에서 Champion Prototypes 섹션
+- [ ] Element 0: ChampionPrototype_Warrior
+- [ ] Element 1: ChampionPrototype_Archer
+- [ ] Element 2: ChampionPrototype_Tank
 
-### 2. Entity Prototype 생성
-- [ ] 챔피언 프로토타입 12개 생성
-  - EntityPrototype 에셋 생성
-  - Transform3D, NavMeshPathfinder, NavMeshSteeringAgent, NavMeshAvoidanceAgent 컴포넌트 추가
-  - ChampionStats, BattleState, SimpleAI는 런타임에 BattleSystem이 추가
+#### 2. NavMesh Bake
+- [ ] Ground 오브젝트 선택
+- [ ] Add Component → NavMesh Surface
+- [ ] Bake 버튼 클릭
+- [ ] Scene 창에서 바닥이 파란색으로 표시되는지 확인
 
-### 3. RuntimeConfig 설정
-- [ ] RuntimeConfig 에셋에서 GameConfig 필드에 BattleGameConfig 연결
+#### 3. 첫 테스트 실행
+- [ ] Play 버튼 클릭
+- [ ] Console 창 확인:
+  - 에러 없이 실행되는지
+  - "PlayerManagementSystem.OnPlayerAdded" 로그 2번 출력 확인
+- [ ] Quantum Inspector (Window > Quantum > Inspector) 열기
+  - Globals → CurrentPhase 확인
+  - Entities → PlayerGameData 2개 확인
 
-### 4. 테스트 씬 구성
-- [ ] Quantum 맵 생성 (NavMesh 포함)
-- [ ] 스폰 포인트 6개 배치 (FPVector3로 변환하여 BattleGameConfig에 저장)
+#### 4. 나머지 챔피언 추가 (선택사항)
+- [ ] ChampionData 9개 추가 생성 (총 12개)
+- [ ] EntityPrototype 9개 추가 생성
+- [ ] BattleGameConfig에 12개 모두 연결
 
-### 5. View 레이어 구현
-- [ ] Input Polling: Unity Input → Quantum Input 변환
-- [ ] UI 업데이트: Signal 리스너로 UI 갱신
-- [ ] 챔피언 렌더링: EntityView로 Entity-GameObject 연결
+### 나중 작업 (View 레이어):
 
-### 6. 테스트
-- [ ] 로컬 2인 플레이 테스트 (ParrelSync 또는 빌드)
+#### 5. Input System 구현
+- [ ] Unity Input → Quantum Input 변환 스크립트
+- [ ] 캐릭터 선택 입력 처리
+- [ ] 전투 순서 입력 처리
+
+#### 6. UI 구현
+- [ ] Signal 리스너 구현
+- [ ] 캐릭터 선택 UI
+- [ ] 전투 순서 UI
+- [ ] 전투 HUD
+- [ ] 결과 화면
+
+#### 7. EntityView 구현
+- [ ] 챔피언 GameObject 프리팹 생성
+- [ ] EntityView 스크립트로 Entity-GameObject 연결
+- [ ] 애니메이션, 이펙트 추가
+
+#### 8. 최종 테스트
+- [ ] 로컬 2인 플레이 테스트 (ParrelSync)
 - [ ] 선택 → 순서 → 전투 → 결과 전체 플로우 검증
 - [ ] AI 전투 동작 확인
 

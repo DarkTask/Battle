@@ -149,7 +149,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/TopDownEngine/ThirdParty/MoreMountains/MMTools/Demos/MMSceneLoading/MMSceneLoadingDemoSceneB.unity
     guid: 352d34cac2435634fb99618d19a3929c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Photon/QuantumAsteroids.disabled/Scenes/AsteroidsGameplay.unity
     guid: 3136b9496174b5049b474ae4480bee65
   m_configObjects: {}

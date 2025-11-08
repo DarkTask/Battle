@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b22dcb3320a0704894fdecd65238eac, type: 3}
+  m_Name: BattleGameConfig
+  m_EditorClassIdentifier: Quantum.Simulation::Quantum.BattleGameConfig
+  Identifier:
+    Path: QuantumUser/Resources/DB/Config/BattleGameConfig
+    Guid:
+      Value: 334188549774717165
+  ChampionPrototypes:
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  - Id:
+      Value: 0
+  SelectTimeLimit:
+    RawValue: 196608
+  BattleTimeLimit:
+    RawValue: 3932160
+  SpawnPositions:
+  - X:
+      RawValue: -655360
+    Y:
+      RawValue: 0
+    Z:
+      RawValue: 0
+  - X:
+      RawValue: -655360
+    Y:
+      RawValue: 0
+    Z:
+      RawValue: 131072
+  - X:
+      RawValue: -655360
+    Y:
+      RawValue: 0
+    Z:
+      RawValue: 262144
+  - X:
+      RawValue: 655360
+    Y:
+      RawValue: 0
+    Z:
+      RawValue: 0
+  - X:
+      RawValue: 655360
+    Y:
+      RawValue: 0
+    Z:
+      RawValue: 131072
+  - X:
+      RawValue: 655360
+    Y:
+      RawValue: 0
+    Z:
+      RawValue: 262144

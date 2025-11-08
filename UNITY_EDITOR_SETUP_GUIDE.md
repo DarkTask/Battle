@@ -161,29 +161,59 @@ EntityPrototype은 Quantum Entity의 "설계도"입니다.
 3. 파일명: **ChampionPrototype_Warrior**
 
 #### 5.1.2 컴포넌트 추가 (Inspector)
-생성된 프로토타입을 선택하면 Inspector 하단에 **Add Component** 버튼이 있습니다.
 
-**추가할 컴포넌트 (순서대로):**
+**ChampionPrototype_Warrior** 에셋을 선택하면 Inspector에 다음이 보입니다:
 
-1. **Transform3D**
-   - 클릭: Add Component > Transform3D
-   - Position: (0, 0, 0) - 기본값 유지
-   - Rotation: (0, 0, 0) - 기본값 유지
+```
+ENTITY PROTOTYPE
+Path: (경로)
+Guid: (GUID)
+Components:
+  List is Empty  [+ 버튼]
+```
 
-2. **NavMeshPathfinder**
-   - 클릭: Add Component > NavMeshPathfinder
-   - 모든 값 기본값 유지
+**컴포넌트 추가 방법:**
 
-3. **NavMeshSteeringAgent**
-   - 클릭: Add Component > NavMeshSteeringAgent
-   - 모든 값 기본값 유지
+1. **Components** 섹션 우측의 **[+] 버튼** 클릭
+2. 드롭다운 메뉴에서 컴포넌트 선택
+3. 아래 컴포넌트들을 **순서대로** 추가:
 
-4. **NavMeshAvoidanceAgent**
-   - 클릭: Add Component > NavMeshAvoidanceAgent
-   - 모든 값 기본값 유지
+**추가할 컴포넌트:**
 
-**주의**: ChampionStats, BattleState, SimpleAI는 **추가하지 마세요**!
+1. **Transform3DPrototype**
+   - [+] 클릭 > 드롭다운에서 "Transform3DPrototype" 선택
+   - 추가되면 Position, Rotation 기본값 유지
+
+2. **NavMeshPathfinderPrototype**
+   - [+] 클릭 > 드롭다운에서 "NavMeshPathfinderPrototype" 선택
+   - 기본값 유지
+
+3. **NavMeshSteeringAgentPrototype**
+   - [+] 클릭 > 드롭다운에서 "NavMeshSteeringAgentPrototype" 선택
+   - 기본값 유지
+
+4. **NavMeshAvoidanceAgentPrototype**
+   - [+] 클릭 > 드롭다운에서 "NavMeshAvoidanceAgentPrototype" 선택
+   - 기본값 유지
+
+**최종 결과:**
+```
+Components:
+  Element 0: Transform3DPrototype
+  Element 1: NavMeshPathfinderPrototype
+  Element 2: NavMeshSteeringAgentPrototype
+  Element 3: NavMeshAvoidanceAgentPrototype
+```
+
+**주의**: 다음 컴포넌트들은 **절대 추가하지 마세요**!
+- ❌ **ChampionStatsPrototype**
+- ❌ **BattleStatePrototype**
+- ❌ **SimpleAIPrototype**
 → 이 컴포넌트들은 BattleSystem이 런타임에 자동으로 추가합니다.
+
+**만약 [+] 버튼이 안 보인다면:**
+- Inspector를 스크롤해서 "Components" 섹션 찾기
+- 또는 Inspector 우측 상단의 자물쇠 아이콘이 잠겨있지 않은지 확인
 
 #### 5.1.3 ChampionData 연결
 1. `Champion_Warrior` ChampionData 에셋 선택
@@ -220,8 +250,14 @@ Hierarchy에서:
 - Directional Light: 유지
 
 ### 6.3 Quantum Map 오브젝트 추가
-1. Hierarchy 빈 공간에서 **우클릭 > Quantum > Map**
-2. 이름: **QuantumMap** (기본값)
+1. Hierarchy 빈 공간에서 **우클릭 > Quantum > Add Quantum To Current Scene**
+2. 여러 Quantum 오브젝트가 자동으로 추가됩니다:
+   - QuantumEntityViewUpdater
+   - QuantumDebugRunner
+   - **QuantumMap** (가장 중요!)
+   - QuantumStats
+   - QuantumDebugInput
+3. 모두 그대로 유지
 
 ### 6.4 바닥(Ground) 생성
 1. Hierarchy 우클릭 > **3D Object > Plane**
