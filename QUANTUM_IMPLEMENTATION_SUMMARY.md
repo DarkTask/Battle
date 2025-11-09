@@ -444,42 +444,59 @@ Phase 4: Result
   - Systems Config: DefaultConfigSystems
   - Map: QuantumMap
 
+#### 6. View 레이어 구현 ✅ (2025-11-09)
+- ✅ **ChampionView_Warrior 프리팹** 생성
+  - 3D Cube, Position (0, 0.5, 0)
+  - QuantumEntityView 컴포넌트 추가
+  - 위치: `Assets/QuantumUser/View/Prefabs/ChampionView_Warrior.prefab`
+
+- ✅ **EntityView_Warrior** 에셋 생성
+  - Prefab 필드에 ChampionView_Warrior 연결
+  - 위치: `Assets/QuantumUser/Resources/DB/EntityViews/EntityView_Warrior.asset`
+  - GUID: 507835255240132189
+
+- ✅ **ChampionPrototype_Warrior에 ViewPrototype 추가**
+  - Element 4: ViewPrototype 컴포넌트 추가
+  - Current 필드에 EntityView_Warrior 연결 (GUID 매칭)
+  - **이것이 없으면 시뮬레이션만 실행되고 화면에 아무것도 안 보임!**
+
+**연결 구조:**
+```
+BattleSystem → Entity 생성 (Simulation)
+  → View 컴포넌트 (GUID: 507835255240132189)
+    → EntityView_Warrior 에셋
+      → ChampionView_Warrior 프리팹
+        → Unity GameObject 인스턴스화! 👁️
+```
+
 ---
 
 ## 다음 단계 (TODO) 📋
 
-### 내일 할 작업:
+### 다음 단계:
 
-#### 1. BattleGameConfig에 ChampionPrototypes 연결
-- [ ] BattleGameConfig 에셋 선택
-- [ ] Inspector에서 Champion Prototypes 섹션
-- [ ] Element 0: ChampionPrototype_Warrior
-- [ ] Element 1: ChampionPrototype_Archer
-- [ ] Element 2: ChampionPrototype_Tank
+#### 1. Play 테스트 실행 (최우선!)
+- [ ] Unity Play 버튼 클릭
+- [ ] Hierarchy에 ChampionView_Warrior(Clone) 2개 생성되는지 확인
+- [ ] Scene 뷰에서 빨간색 큐브 2개 보이는지 확인 (-10, 0, 0)과 (10, 0, 0)
 
-#### 2. NavMesh Bake
-- [ ] Ground 오브젝트 선택
-- [ ] Add Component → NavMesh Surface
-- [ ] Bake 버튼 클릭
-- [ ] Scene 창에서 바닥이 파란색으로 표시되는지 확인
+#### 2. 나머지 챔피언 View 추가 (선택사항)
+- [ ] ChampionView_Archer 프리팹 생성 (파란색 큐브)
+- [ ] EntityView_Archer 에셋 생성
+- [ ] ChampionPrototype_Archer에 ViewPrototype 추가
+- [ ] ChampionView_Tank 프리팹 생성 (회색 큐브)
+- [ ] EntityView_Tank 에셋 생성
+- [ ] ChampionPrototype_Tank에 ViewPrototype 추가
 
-#### 3. 첫 테스트 실행
-- [ ] Play 버튼 클릭
-- [ ] Console 창 확인:
-  - 에러 없이 실행되는지
-  - "PlayerManagementSystem.OnPlayerAdded" 로그 2번 출력 확인
-- [ ] Quantum Inspector (Window > Quantum > Inspector) 열기
-  - Globals → CurrentPhase 확인
-  - Entities → PlayerGameData 2개 확인
+#### 3. AI 전투 구현 (다음 단계)
+- [ ] SimpleAISystem 구현 (적 탐색, 추적, 공격)
+- [ ] NavMesh 기반 이동 시스템
+- [ ] 체력 감소 및 사망 처리
+- [ ] 승패 판정 로직
 
-#### 4. 나머지 챔피언 추가 (선택사항)
-- [ ] ChampionData 9개 추가 생성 (총 12개)
-- [ ] EntityPrototype 9개 추가 생성
-- [ ] BattleGameConfig에 12개 모두 연결
+### 나중 작업:
 
-### 나중 작업 (View 레이어):
-
-#### 5. Input System 구현
+#### 4. Input System 구현
 - [ ] Unity Input → Quantum Input 변환 스크립트
 - [ ] 캐릭터 선택 입력 처리
 - [ ] 전투 순서 입력 처리

@@ -18,29 +18,7 @@ MonoBehaviour:
       Value: 334188549774717165
   ChampionPrototypes:
   - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
-  - Id:
-      Value: 0
+      Value: 348010944243757014
   SelectTimeLimit:
     RawValue: 196608
   BattleTimeLimit:

@@ -27,3 +27,6 @@ MonoBehaviour:
     SystemsConfig:
       Id:
         Value: 1419415263435664761
+    GameConfig:
+      Id:
+        Value: 334188549774717165

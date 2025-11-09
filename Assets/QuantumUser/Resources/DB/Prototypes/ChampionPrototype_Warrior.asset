@@ -22,6 +22,7 @@ MonoBehaviour:
     - rid: 7874515547293745401
     - rid: 7874515547293745402
     - rid: 7874515547293745403
+    - rid: 7874515547293745404
   references:
     version: 2
     RefIds:
@@ -72,4 +73,10 @@ MonoBehaviour:
           RawValue: 0
     - rid: 7874515547293745403
       type: {class: NavMeshAvoidanceAgentPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data: 
+      data:
+    - rid: 7874515547293745404
+      type: {class: ViewPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Current:
+          Id:
+            Value: 507835255240132189

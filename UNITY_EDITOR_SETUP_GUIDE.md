@@ -8,7 +8,8 @@
 5. [Champion EntityPrototype 생성 (3개)](#5-champion-entityprototype-생성)
 6. [Quantum 맵 씬 생성](#6-quantum-맵-씬-생성)
 7. [RuntimeConfig 설정](#7-runtimeconfig-설정)
-8. [테스트 실행](#8-테스트-실행)
+8. [View 레이어 구현 (시각화)](#8-view-레이어-구현)
+9. [테스트 실행](#9-테스트-실행)
 
 ---
 
@@ -196,14 +197,20 @@ Components:
    - [+] 클릭 > 드롭다운에서 "NavMeshAvoidanceAgentPrototype" 선택
    - 기본값 유지
 
-**최종 결과:**
+**최종 결과 (5개 컴포넌트):**
 ```
 Components:
   Element 0: Transform3DPrototype
   Element 1: NavMeshPathfinderPrototype
   Element 2: NavMeshSteeringAgentPrototype
   Element 3: NavMeshAvoidanceAgentPrototype
+  Element 4: ViewPrototype ⭐ (중요!)
 ```
+
+**5. ViewPrototype 추가 (필수!)**
+   - [+] 클릭 > 드롭다운에서 "ViewPrototype" 선택
+   - **Current** 필드에 **EntityView_Warrior** 드래그 앤 드롭
+   - 이 연결이 없으면 시뮬레이션만 실행되고 화면에 아무것도 안 보임!
 
 **주의**: 다음 컴포넌트들은 **절대 추가하지 마세요**!
 - ❌ **ChampionStatsPrototype**
@@ -317,9 +324,117 @@ Hierarchy에서:
 
 ---
 
-## 8. 테스트 실행
+## 8. View 레이어 구현
 
-### 8.1 BattleGameConfig에 ChampionPrototype 연결
+View 레이어는 Quantum 시뮬레이션 Entity를 Unity GameObject로 시각화합니다.
+
+### 8.1 Unity 프리팹 생성
+
+#### 8.1.1 Warrior 시각화 프리팹
+
+1. **Hierarchy에서 큐브 생성**
+   - 우클릭 > **3D Object > Cube**
+   - 이름: **ChampionView_Warrior**
+
+2. **Transform 설정**
+   - Position: (0, 0.5, 0)  ← 바닥에서 0.5 띄워서 반만 묻히게
+   - Scale: (1, 1, 1)
+
+3. **Material 생성 (선택사항)**
+   - Project 창: `Assets/QuantumUser/View/Materials` 폴더 생성
+   - 우클릭 > Create > Material
+   - 이름: **Mat_Warrior**
+   - Inspector: Albedo 색상을 빨간색으로 설정
+   - Cube의 MeshRenderer > Materials에 Mat_Warrior 드래그
+
+4. **QuantumEntityView 컴포넌트 추가 (필수!)**
+   - ChampionView_Warrior 선택 상태에서
+   - Inspector 하단: **Add Component**
+   - 검색: **Quantum Entity View**
+   - 추가 후 설정:
+     - **Bind Behaviour**: Verified (기본값)
+     - **Manual Disposal**: 체크 해제 (기본값)
+
+5. **프리팹으로 저장**
+   - Project 창: `Assets/QuantumUser/View/Prefabs` 폴더 생성
+   - Hierarchy의 **ChampionView_Warrior**를 Prefabs 폴더로 드래그
+   - 프리팹 생성 완료!
+   - Hierarchy에서 원본 삭제 (프리팹은 유지)
+
+### 8.2 EntityViewAsset 생성
+
+EntityViewAsset은 Quantum Entity와 Unity Prefab을 연결합니다.
+
+1. **에셋 생성**
+   - Project 창: `Assets/QuantumUser/Resources/DB/EntityViews` 폴더 생성
+   - 폴더 선택 후 우클릭
+   - **Create > Quantum > Entity View**
+   - 이름: **EntityView_Warrior**
+
+2. **프리팹 연결**
+   - EntityView_Warrior 선택
+   - Inspector에서:
+     - **Prefab** 필드에 **ChampionView_Warrior** 프리팹 드래그 앤 드롭
+   - 저장 (Ctrl+S)
+
+### 8.3 EntityPrototype에 View 컴포넌트 추가 ⭐
+
+**가장 중요한 단계!** 이것이 없으면 화면에 아무것도 안 보입니다.
+
+1. **ChampionPrototype_Warrior 선택**
+   - `Assets/QuantumUser/Resources/DB/Prototypes/ChampionPrototype_Warrior`
+
+2. **ViewPrototype 컴포넌트 추가**
+   - Inspector에서 **Components** 섹션 찾기
+   - 우측의 **[+]** 버튼 클릭
+   - 드롭다운에서 **"ViewPrototype"** 검색 및 선택
+
+3. **EntityViewAsset 연결**
+   - ViewPrototype이 추가되면 **Current** 필드가 나타남
+   - **Current** 필드에 **EntityView_Warrior** 드래그 앤 드롭
+   - 이제 Components는 총 5개가 됨:
+     ```
+     Element 0: Transform3DPrototype
+     Element 1: NavMeshPathfinderPrototype
+     Element 2: NavMeshSteeringAgentPrototype
+     Element 3: NavMeshAvoidanceAgentPrototype
+     Element 4: ViewPrototype ✅
+     ```
+
+4. **저장**
+   - Ctrl+S
+
+### 8.4 연결 구조 확인
+
+최종 연결 흐름:
+```
+BattleSystem.SpawnChampion()
+  ↓
+Entity 생성 (Simulation)
+  ↓
+View 컴포넌트 읽기 → EntityView_Warrior (GUID 매칭)
+  ↓
+QuantumEntityViewUpdater가 감지
+  ↓
+ChampionView_Warrior 프리팹 Instantiate
+  ↓
+Unity Scene에 GameObject 생성! 👁️
+```
+
+### 8.5 나머지 챔피언 View 생성 (선택사항)
+
+Archer, Tank도 동일한 방법으로:
+1. Cube 생성 → 파란색(Archer), 회색(Tank)
+2. QuantumEntityView 추가
+3. 프리팹 저장
+4. EntityView_Archer, EntityView_Tank 생성
+5. ChampionPrototype_Archer, ChampionPrototype_Tank에 ViewPrototype 추가
+
+---
+
+## 9. 테스트 실행
+
+### 9.1 BattleGameConfig에 ChampionPrototype 연결
 이제 모든 에셋이 준비되었으므로:
 
 1. **BattleGameConfig** 에셋 선택
@@ -330,39 +445,58 @@ Hierarchy에서:
    - Element 2: **ChampionPrototype_Tank**
    - Element 3~11: 비워둠 (None) - 나중에 추가
 
-### 8.2 테스트 스크립트 추가 (임시)
+### 9.2 QuantumDebugRunner 설정
+1. Hierarchy에서 **QuantumDebugRunner** 선택
+2. Inspector에서 다음 설정:
 
-#### 8.2.1 QuantumMap 오브젝트에 컴포넌트 추가
-1. Hierarchy에서 **QuantumMap** 선택
-2. Inspector 하단: **Add Component**
-3. 검색: **Quantum Runner** (Quantum 기본 컴포넌트)
-   - 만약 이미 있다면 스킵
+**Runtime Config 섹션:**
+- **Game Config**: BattleGameConfig 연결 (우측 동그라미 아이콘 클릭)
 
-#### 8.2.2 GameMode 설정
-1. QuantumMap 선택
-2. Inspector에서 Quantum Runner 컴포넌트 찾기
-3. **Game Mode**: **Multiplayer** 선택 (로컬 2인 테스트용)
-4. **Player Count**: **2**
+**Player 설정:**
+- **Max Player Count**: 2
 
-### 8.3 Play 버튼 클릭!
+**Local Players (로컬 테스트용):**
+- Size: 2로 설정하면 로컬 2인 플레이 가능
+- 또는 비워두고 서버 모드로 실행
+
+### 9.3 Play 버튼 클릭!
 1. Unity 에디터 상단의 **▶ Play** 버튼 클릭
 2. Console 창 확인:
    - 에러 없이 실행되는지 확인
    - Quantum 초기화 로그 확인
 
-### 8.4 예상 동작
-현재는 **View 레이어가 없으므로**:
-- 화면에 아무것도 안 보일 수 있음
-- Console에 다음 로그가 나오면 성공:
-  ```
-  [Quantum] Session started
-  [Quantum] Frame 0
-  PlayerManagementSystem.OnPlayerAdded (player 0)
-  PlayerManagementSystem.OnPlayerAdded (player 1)
-  GamePhaseSystem: Changed to Lobby
-  ```
+### 9.4 예상 동작 (View 레이어 완료 후)
 
-### 8.5 디버그 확인
+**Console 로그:**
+```
+[Quantum] Session started
+🎮 Player Added: 0, FirstTime: True
+✅ PlayerGameData created for 0, TeamId: 0
+🎮 Player Added: 1, FirstTime: True
+✅ PlayerGameData created for 1, TeamId: 1
+📋 Phase Changed: Lobby → CharacterSelect
+✅ Champion spawned: ChampionId=0, Team=0, Slot=0, Entity=E.00003.001
+✅ Champion spawned: ChampionId=0, Team=1, Slot=0, Entity=E.00004.001
+⚔️ Round 1 Start!
+```
+
+**Hierarchy 창:**
+```
+- Main Camera
+- Directional Light
+- QuantumEntityViewUpdater
+- QuantumDebugRunner
+- QuantumMap
+- Ground
+- ChampionView_Warrior(Clone)  ✅ 생성됨!
+- ChampionView_Warrior(Clone)  ✅ 생성됨!
+```
+
+**Scene 뷰:**
+- 왼쪽(-10, 0, 0)에 빨간색 큐브 1개 (Team A)
+- 오른쪽(10, 0, 0)에 빨간색 큐브 1개 (Team B)
+
+### 9.5 디버그 확인
 
 #### 8.5.1 Quantum Inspector 열기
 1. Play 모드 상태에서

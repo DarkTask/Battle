@@ -40,7 +40,7 @@ namespace Quantum
         {
             var globals = f.Globals;
             globals->CurrentRound = round;
-            globals->BattleTimer = FP.FromFloat_UNSAFE(60);  // 60초
+            globals->BattleTimer = FP.FromFloat_UNSAFE(999);  // 999초 (테스트용 - 라운드가 자동으로 끝나지 않음)
 
             Log.Info($"⚔️ Round {round} Start!");
             f.Signals.OnBattleStart(round);
@@ -104,8 +104,24 @@ namespace Quantum
             var filter = f.Filter<PlayerGameData>();
             while (filter.NextUnsafe(out var entity, out var data))
             {
-                int championIndex = f.ResolveList(data->BattleOrder)[slotIndex];
-                int championId = f.ResolveList(data->SelectedChampions)[championIndex];
+                var battleOrder = f.ResolveList(data->BattleOrder);
+                var selectedChampions = f.ResolveList(data->SelectedChampions);
+
+                // 디버그 로그
+                Log.Info($"🐛 Round {round}: Player={data->PlayerRef}, TeamId={data->TeamId}");
+                Log.Info($"   BattleOrder Count={battleOrder.Count}, SelectedChampions Count={selectedChampions.Count}");
+                Log.Info($"   slotIndex={slotIndex}, BattleOrder[{slotIndex}]={battleOrder[slotIndex]}");
+
+                int championIndex = battleOrder[slotIndex];
+
+                // 경계 체크
+                if (championIndex < 0 || championIndex >= selectedChampions.Count)
+                {
+                    Log.Error($"❌ Invalid championIndex={championIndex}, SelectedChampions.Count={selectedChampions.Count}");
+                    continue;
+                }
+
+                int championId = selectedChampions[championIndex];
                 int teamId = data->TeamId;
 
                 SpawnChampion(f, championId, teamId, slotIndex);
@@ -121,11 +137,27 @@ namespace Quantum
             while (filter.NextUnsafe(out var entity, out var data))
             {
                 int teamId = data->TeamId;
+                var battleOrder = f.ResolveList(data->BattleOrder);
+                var selectedChampions = f.ResolveList(data->SelectedChampions);
 
                 for (int i = 0; i < 3; i++)
                 {
-                    int championIndex = f.ResolveList(data->BattleOrder)[i];
-                    int championId = f.ResolveList(data->SelectedChampions)[championIndex];
+                    // 경계 체크
+                    if (i >= battleOrder.Count)
+                    {
+                        Log.Error($"❌ BattleOrder index out of range: i={i}, Count={battleOrder.Count}");
+                        continue;
+                    }
+
+                    int championIndex = battleOrder[i];
+
+                    if (championIndex < 0 || championIndex >= selectedChampions.Count)
+                    {
+                        Log.Error($"❌ Invalid championIndex={championIndex}, SelectedChampions.Count={selectedChampions.Count}");
+                        continue;
+                    }
+
+                    int championId = selectedChampions[championIndex];
 
                     SpawnChampion(f, championId, teamId, i);
                 }

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 206745634, guid: b156eeaae3f741b40af66649a4748430, type: 3}
+  m_Name: EntityView_Warrior
+  m_EditorClassIdentifier: Quantum.Engine.dll::Quantum.EntityView
+  Identifier:
+    Path: QuantumUser/Resources/DB/EntityViews/EntityView_Warrior
+    Guid:
+      Value: 507835255240132189
+  Prefab: {fileID: 2632543664120476534, guid: 401e17cd490371542a2882b69b38b643, type: 3}

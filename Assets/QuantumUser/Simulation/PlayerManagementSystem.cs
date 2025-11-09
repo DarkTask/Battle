@@ -24,6 +24,10 @@ namespace Quantum
             data->OrderSubmitted = false;
             data->TeamId = GetTeamId(f, player);
 
+            // QList 초기화 (매우 중요! 안하면 쓰레기 값이 들어있음)
+            data->SelectedChampions = f.AllocateList<int>();
+            data->BattleOrder = f.AllocateList<int>();
+
             Log.Info($"✅ PlayerGameData created for {player}, TeamId: {data->TeamId}");
 
             // 플레이어가 2명이 되면 게임 시작

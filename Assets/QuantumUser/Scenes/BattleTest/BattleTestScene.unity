@@ -211,11 +211,19 @@ MonoBehaviour:
         Value: 1419415263435664761
     GameConfig:
       Id:
-        Value: 0
+        Value: 334188549774717165
   UseRandomSeed: 0
   SessionConfig: {fileID: 0}
-  LocalPlayers: []
-  MaxPlayerCount: 0
+  LocalPlayers:
+  - PlayerAvatar:
+      Id:
+        Value: 0
+    PlayerNickname: 
+  - PlayerAvatar:
+      Id:
+        Value: 0
+    PlayerNickname: 
+  MaxPlayerCount: 2
   SimulationSpeedMultiplier: 1
   DisplaySaveAndReloadButton: 0
   PreloadAddressables: 0

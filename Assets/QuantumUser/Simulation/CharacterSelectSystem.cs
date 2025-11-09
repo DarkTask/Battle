@@ -67,12 +67,12 @@ namespace Quantum
                 return false;
             }
 
-            // 중복 선택 확인
-            if (IsChampionAlreadySelected(f, championId))
-            {
-                Log.Error($"Champion {championId} already selected");
-                return false;
-            }
+            // 중복 선택 확인 (테스트용으로 주석 처리)
+            // if (IsChampionAlreadySelected(f, championId))
+            // {
+            //     Log.Error($"Champion {championId} already selected");
+            //     return false;
+            // }
 
             // 선택 처리
             f.ResolveList(playerData->SelectedChampions).Add(championId);
@@ -102,18 +102,12 @@ namespace Quantum
                 return;
             }
 
-            // 아직 선택되지 않은 챔피언 중 랜덤 선택
-            var randomChampionId = FindUnselectedChampion(f);
-            if (randomChampionId >= 0)
-            {
-                Log.Info($"⏰ Auto selecting champion {randomChampionId} for player {currentPlayer}");
-                SelectChampion(f, currentPlayer, randomChampionId);
-            }
-            else
-            {
-                Log.Error("No available champion for auto select");
-                NextTurn(f, globals);
-            }
+            // 테스트용: 항상 첫 번째 챔피언 (championId 0) 선택
+            // 중복 선택이 허용되므로 계속 같은 챔피언 선택 가능
+            int championId = 0;  // Warrior
+
+            Log.Info($"⏰ Auto selecting champion {championId} for player {currentPlayer}");
+            SelectChampion(f, currentPlayer, championId);
         }
 
         /// <summary>

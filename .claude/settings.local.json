@@ -4,7 +4,11 @@
       "Bash(dir /s \"C:\\Git\\Battle\\Assets\\QuantumUser\\Simulation\")",
       "Bash(mkdir:*)",
       "Bash(bash \"C:\\Git\\Battle\\fix_qlist.sh\")",
-      "Bash(bash \"C:\\Git\\Battle\\fix_qlist_v2.sh\")"
+      "Bash(bash \"C:\\Git\\Battle\\fix_qlist_v2.sh\")",
+      "Bash(powershell -Command \"Get-Process Unity -ErrorAction SilentlyContinue | Select-Object -First 1 | Format-List Id,ProcessName,MainWindowTitle\")",
+      "Bash(dir /s \"C:\\Git\\Battle\\quantum.code\\quantum.code\\*EntityView*\")",
+      "Bash(powershell -Command:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
