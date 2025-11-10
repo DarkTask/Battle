@@ -1,15 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir /s \"C:\\Git\\Battle\\Assets\\QuantumUser\\Simulation\")",
-      "Bash(mkdir:*)",
-      "Bash(bash \"C:\\Git\\Battle\\fix_qlist.sh\")",
-      "Bash(bash \"C:\\Git\\Battle\\fix_qlist_v2.sh\")",
-      "Bash(powershell -Command \"Get-Process Unity -ErrorAction SilentlyContinue | Select-Object -First 1 | Format-List Id,ProcessName,MainWindowTitle\")",
-      "Bash(dir /s \"C:\\Git\\Battle\\quantum.code\\quantum.code\\*EntityView*\")",
+      "Bash(git checkout:*)",
       "Bash(powershell -Command:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nQuantum View 레이어 구현 완료 - 시뮬레이션 Entity 시각화\n\n## 주요 변경사항\n\n### View 레이어 에셋 생성\n- ChampionView_Warrior 프리팹 생성 (빨간색 큐브, QuantumEntityView 컴포넌트)\n- EntityView_Warrior 에셋 생성 (프리팹 연결, GUID: 507835255240132189)\n- Mat_Warrior 머티리얼 생성\n\n### EntityPrototype에 ViewPrototype 추가 ⭐\n- ChampionPrototype_Warrior에 ViewPrototype 컴포넌트 추가 (Element 4)\n- EntityView_Warrior 연결 (GUID 기반 매칭)\n- **이것이 핵심**: View 컴포넌트 없으면 시뮬레이션만 실행되고 화면에 아무것도 안 보임\n\n### 시뮬레이션 수정사항\n- BattleSystem: BattleTimer를 999초로 증가 (테스트 시간 확보)\n- CharacterSelectSystem: 자동 선택을 ChampionId 0으로 고정 (Warrior만 테스트)\n- OrderSetupSystem: Order 제출 로직 개선\n- PlayerManagementSystem: QList 초기화 버그 수정\n\n### 문서 업데이트\n- UNITY_EDITOR_SETUP_GUIDE.md: \"8. View 레이어 구현\" 섹션 추가\n- QUANTUM_IMPLEMENTATION_SUMMARY.md: View 레이어 완료 상태 기록\n- 연결 구조 다이어그램 추가\n\n## 연결 구조\n```\nBattleSystem.SpawnChampion()\n  → Entity 생성 (Simulation)\n    → View 컴포넌트 (GUID 매칭)\n      → EntityView_Warrior 에셋\n        → ChampionView_Warrior 프리팹\n          → QuantumEntityViewUpdater가 인스턴스화\n            → Unity Scene에 GameObject 생성! 👁️\n```\n\n## 테스트 방법\n1. Unity Play 버튼 클릭\n2. Hierarchy: ChampionView_Warrior(Clone) 2개 생성 확인\n3. Scene 뷰: (-10, 0, 0)과 (10, 0, 0)에 빨간색 큐브 2개 확인\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
