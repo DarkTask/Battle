@@ -1,140 +1,191 @@
+using Photon.Deterministic;
+
 namespace Quantum
 {
-    using Photon.Deterministic;
-
-    /// <summary>
-    /// 간단한 AI 전투 시스템
-    /// </summary>
     public unsafe class SimpleAISystem : SystemMainThreadFilter<SimpleAISystem.Filter>
     {
         public struct Filter
         {
             public EntityRef Entity;
             public SimpleAI* AI;
-            public BattleState* Battle;
-            public ChampionStats* Stats;
+            public BattleState* BattleState;
             public Transform3D* Transform;
+            public NavMeshPathfinder* Pathfinder;
         }
 
         public override void Update(Frame f, ref Filter filter)
         {
-            // 죽은 캐릭터는 처리 안 함
-            if (!filter.Battle->IsAlive)
+            // 디버그: IsAlive 체크
+            if (!filter.BattleState->IsAlive)
+            {
+                // Log.Info($"❌ {filter.Entity} is dead, skipping AI");
                 return;
+            }
 
-            // Think Timer 감소
+            // ThinkTimer는 타겟 찾기에만 사용 (0.5초마다)
             filter.AI->ThinkTimer -= f.DeltaTime;
-            if (filter.AI->ThinkTimer > FP._0)
-                return;
-
-            filter.AI->ThinkTimer = FP._0_50;  // 0.5초마다 Think
-
-            // 타겟 찾기
-            if (filter.Battle->CurrentTarget == EntityRef.None || !IsTargetValid(f, filter.Battle->CurrentTarget))
+            if (filter.AI->ThinkTimer <= FP._0)
             {
-                filter.Battle->CurrentTarget = FindNearestEnemy(f, filter.Entity, filter.Battle->TeamId, filter.Transform->Position);
-            }
+                // Log.Info($"🧠 {filter.Entity} thinking... (ThinkTimer expired)");
+                filter.AI->ThinkTimer = FP._0_50;
 
-            // 타겟 공격
-            if (filter.Battle->CurrentTarget != EntityRef.None)
-            {
-                AttackTarget(f, ref filter);
-            }
-        }
-
-        /// <summary>
-        /// 타겟이 유효한가?
-        /// </summary>
-        bool IsTargetValid(Frame f, EntityRef target)
-        {
-            if (!f.Exists(target))
-                return false;
-
-            if (f.Unsafe.TryGetPointer<BattleState>(target, out var state))
-            {
-                return state->IsAlive;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// 가장 가까운 적 찾기
-        /// </summary>
-        EntityRef FindNearestEnemy(Frame f, EntityRef self, int myTeam, FPVector3 myPos)
-        {
-            EntityRef nearest = EntityRef.None;
-            FP minDistance = FP.MaxValue;
-
-            var filter = f.Filter<BattleState, Transform3D>();
-            while (filter.NextUnsafe(out var entity, out var state, out var transform))
-            {
-                if (entity == self)
-                    continue;
-
-                if (state->TeamId == myTeam)
-                    continue;
-
-                if (!state->IsAlive)
-                    continue;
-
-                FP distance = FPVector3.Distance(myPos, transform->Position);
-                if (distance < minDistance)
+                // 타겟이 없거나 죽었으면 새로운 타겟 찾기
+                if (filter.BattleState->CurrentTarget == EntityRef.None ||
+                    !f.Exists(filter.BattleState->CurrentTarget) ||
+                    !IsAlive(f, filter.BattleState->CurrentTarget))
                 {
-                    minDistance = distance;
-                    nearest = entity;
+                    FindNewTarget(f, ref filter);
                 }
             }
 
-            return nearest;
+            // 전투 처리는 매 프레임 실행 (AttackCooldown이 자체적으로 관리됨)
+            if (filter.BattleState->CurrentTarget != EntityRef.None)
+            {
+                ProcessCombat(f, ref filter);
+            }
         }
 
-        /// <summary>
-        /// 타겟 공격
-        /// </summary>
-        void AttackTarget(Frame f, ref Filter filter)
+        void FindNewTarget(Frame f, ref Filter filter)
         {
-            // 공격 쿨다운 확인
-            if (filter.Battle->AttackCooldown > FP._0)
+            EntityRef closestEnemy = EntityRef.None;
+            FP closestDistance = filter.AI->SearchRadius;
+
+            // Log.Info($"🔍 {filter.Entity} searching for enemies... (MyTeam={filter.BattleState->TeamId}, SearchRadius={filter.AI->SearchRadius})");
+
+            var enemyFilter = f.Filter<BattleState, Transform3D>();
+            // int totalEnemies = 0;
+            // int sameTeam = 0;
+            // int deadEnemies = 0;
+            // int tooFar = 0;
+
+            while (enemyFilter.NextUnsafe(out var enemyEntity, out var enemyState, out var enemyTransform))
             {
-                filter.Battle->AttackCooldown -= f.DeltaTime;
+                // totalEnemies++;
+                // Log.Info($"   Found entity: {enemyEntity}, Team={enemyState->TeamId}, IsAlive={enemyState->IsAlive}");
+
+                if (enemyState->TeamId == filter.BattleState->TeamId)
+                {
+                    // sameTeam++;
+                    continue;
+                }
+
+                if (!enemyState->IsAlive)
+                {
+                    // deadEnemies++;
+                    continue;
+                }
+
+                FP distance = FPVector3.Distance(filter.Transform->Position, enemyTransform->Position);
+                // Log.Info($"   Distance to {enemyEntity}: {distance} (SearchRadius: {filter.AI->SearchRadius})");
+
+                if (distance <= closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = enemyEntity;
+                }
+                // else
+                // {
+                //     tooFar++;
+                // }
+            }
+
+            // Log.Info($"   Search results: Total={totalEnemies}, SameTeam={sameTeam}, Dead={deadEnemies}, TooFar={tooFar}");
+
+            filter.BattleState->CurrentTarget = closestEnemy;
+
+            if (closestEnemy != EntityRef.None)
+            {
+                Log.Info($"🎯 {filter.Entity} found target: {closestEnemy} (distance: {closestDistance})");
+            }
+            // else
+            // {
+            //     Log.Info($"❌ {filter.Entity} found NO target!");
+            // }
+        }
+
+        void ProcessCombat(Frame f, ref Filter filter)
+        {
+            var target = filter.BattleState->CurrentTarget;
+
+            if (!f.TryGet<Transform3D>(target, out var targetTransform))
+            {
+                // Log.Info($"❌ ProcessCombat: Target {target} has no Transform3D!");
                 return;
             }
 
-            // 타겟 거리 확인
-            if (!f.Unsafe.TryGetPointer<Transform3D>(filter.Battle->CurrentTarget, out var targetTransform))
-                return;
-
-            FP distance = FPVector3.Distance(filter.Transform->Position, targetTransform->Position);
+            FP distance = FPVector3.Distance(filter.Transform->Position, targetTransform.Position);
+            // Log.Info($"📏 {filter.Entity} ProcessCombat: Distance={distance}, AttackRange={filter.AI->AttackRange}, Cooldown={filter.BattleState->AttackCooldown}");
 
             if (distance <= filter.AI->AttackRange)
             {
-                // 공격!
-                if (f.Unsafe.TryGetPointer<BattleState>(filter.Battle->CurrentTarget, out var targetState))
+                // Log.Info($"💥 {filter.Entity} IN ATTACK RANGE!");
+                if (filter.BattleState->AttackCooldown <= FP._0)
                 {
-                    FP damage = filter.Stats->AttackPower;
-                    targetState->Health -= damage;
+                    // Log.Info($"⚡ {filter.Entity} Cooldown expired, ATTACKING!");
+                    AttackTarget(f, filter.Entity, target);
 
-                    Log.Info($"⚔️ Attack! {filter.Entity} → {filter.Battle->CurrentTarget}, Damage: {damage}, Remaining HP: {targetState->Health}");
-
-                    // 죽음 처리
-                    if (targetState->Health <= FP._0)
+                    if (f.Unsafe.TryGetPointer<ChampionStats>(filter.Entity, out var stats))
                     {
-                        targetState->IsAlive = false;
-                        Log.Info($"💀 Champion died: {filter.Battle->CurrentTarget}");
-                        f.Signals.OnChampionDeath(filter.Battle->CurrentTarget);
+                        filter.BattleState->AttackCooldown = FP._1 / stats->AttackSpeed;
+                        // Log.Info($"⏱️ {filter.Entity} Set cooldown to {filter.BattleState->AttackCooldown} (1 / AttackSpeed={stats->AttackSpeed})");
                     }
-
-                    // 쿨다운 설정 (AttackSpeed 역수)
-                    filter.Battle->AttackCooldown = FP._1 / filter.Stats->AttackSpeed;
+                    else
+                    {
+                        filter.BattleState->AttackCooldown = FP._1;
+                        // Log.Info($"⏱️ {filter.Entity} Set cooldown to 1 (no stats)");
+                    }
+                }
+                else
+                {
+                    // Log.Info($"⏳ {filter.Entity} Waiting for cooldown... ({filter.BattleState->AttackCooldown} remaining)");
+                    filter.BattleState->AttackCooldown -= f.DeltaTime;
                 }
             }
             else
             {
-                // 타겟에게 이동 (간단한 직선 이동)
-                FPVector3 direction = (targetTransform->Position - filter.Transform->Position).Normalized;
-                filter.Transform->Position += direction * filter.Stats->MoveSpeed * f.DeltaTime;
+                // Log.Info($"🏃 {filter.Entity} MOVING to target (distance {distance} > range {filter.AI->AttackRange})");
+                // 타겟 방향으로 직접 이동
+                FPVector3 direction = (targetTransform.Position - filter.Transform->Position).Normalized;
+                FP moveSpeed = FP._10;  // 이동 속도
+                FPVector3 newPosition = filter.Transform->Position + direction * moveSpeed * f.DeltaTime;
+
+                filter.Transform->Position = newPosition;
             }
+        }
+
+        void AttackTarget(Frame f, EntityRef attacker, EntityRef target)
+        {
+            if (!f.Unsafe.TryGetPointer<ChampionStats>(attacker, out var attackerStats))
+                return;
+
+            if (!f.Unsafe.TryGetPointer<BattleState>(target, out var targetState))
+                return;
+
+            FP attackDamage = attackerStats->AttackPower;
+            targetState->Health -= attackDamage;
+
+            Log.Info($"⚔️ {attacker} attacks {target} for {attackDamage} damage! (HP: {targetState->Health})");
+
+            if (targetState->Health <= FP._0)
+            {
+                targetState->IsAlive = false;
+                Log.Info($"💀 {target} died!");
+
+                f.Signals.OnChampionDeath(target);
+
+                if (f.Unsafe.TryGetPointer<BattleState>(attacker, out var attackerState))
+                {
+                    attackerState->CurrentTarget = EntityRef.None;
+                }
+            }
+        }
+
+        bool IsAlive(Frame f, EntityRef entity)
+        {
+            if (!f.TryGet<BattleState>(entity, out var state))
+                return false;
+
+            return state.IsAlive;
         }
     }
 }

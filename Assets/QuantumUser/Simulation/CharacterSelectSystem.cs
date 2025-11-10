@@ -116,7 +116,7 @@ namespace Quantum
         static void NextTurn(Frame f, _globals_* globals)
         {
             globals->SelectTurn++;
-            globals->SelectTimer = FP._3;  // 3초 리셋
+            globals->SelectTimer = FP.FromFloat_UNSAFE(0.3f);  // 0.3초 리셋
         }
 
         /// <summary>

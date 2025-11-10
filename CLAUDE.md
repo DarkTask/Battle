@@ -177,10 +177,14 @@ Window > AI > Navigation
 - 전투 순서 지정 UI (드래그 앤 드롭)
 - 전투 아레나 (라운드 관리, 승패 판정)
 - 1인 테스트 모드
+- **Photon Quantum 3 전투 시스템 (2025-11-11)**
+  - SimpleAI 시스템 (타겟 찾기, 이동, 공격)
+  - 자동 전투 AI (적 탐색, 이동, 공격 반복)
+  - 공격 쿨다운 시스템
+  - 체력/데미지 시스템
 
 🔄 **진행 중**:
-- 전투 스폰 작업 (최근 커밋: "전투 스폰 작업중")
-- Order 동기화 작업
+- Quantum View 레이어 최적화 (움직임 보간)
 
 ⏳ **대기**:
 - 3v3 단체전 로직
@@ -192,11 +196,131 @@ Window > AI > Navigation
 
 - **1인 테스트 모드 우선**: 멀티플레이어는 나중에, 지금은 혼자서 빠르게 개발
 - **기존 UI 재사용**: MatchControllerEx의 UI 구조를 최대한 활용
-- **NavMesh 필수**: AI가 움직이려면 반드시 Bake 필요
-- **레이어 설정 중요**: TeamA/TeamB 레이어 없으면 AI가 적 인식 못함
+- **Quantum 전투 시스템**: NavMesh 대신 직접 Transform 조작으로 이동 구현
+- **레이어 설정 중요**: TeamA/TeamB 레이어 없으면 AI가 적 인식 못함 (Mirror 시스템)
 - **Mirror 동기화 주의**: NetworkBehaviour 상속, [SyncVar]/[Command]/[ClientRpc] 올바르게 사용
 
 ## 최근 디버깅 히스토리
+
+### 2025-11-11: Photon Quantum 3 전투 시스템 구현
+
+#### 개요
+Photon Quantum 3의 결정론적 ECS 아키텍처를 사용하여 자동 전투 AI 시스템 구현 완료.
+
+#### 구현 내용
+
+**1. 캐릭터 선택 타이머 조정**
+- 빠른 테스트를 위해 선택 타이머를 3초 → 1초 → 0.3초로 단축
+- 파일: `CharacterSelectSystem.cs`, `GamePhaseSystem.cs`
+
+**2. AI 이동 시스템**
+- **문제**: NavMesh가 맵에 설정되지 않아 이동 불가
+- **해결**: NavMesh 대신 Transform3D를 직접 조작하는 방식으로 변경
+- 이동 속도: 최종 10 (FP._10) 설정
+- 코드:
+```csharp
+FPVector3 direction = (targetTransform.Position - filter.Transform->Position).Normalized;
+FP moveSpeed = FP._10;
+FPVector3 newPosition = filter.Transform->Position + direction * moveSpeed * f.DeltaTime;
+filter.Transform->Position = newPosition;
+```
+
+**3. 타겟 탐색 시스템**
+- SearchRadius 내에서 가장 가까운 적 찾기
+- 같은 팀, 죽은 적 필터링
+- **버그 수정**: 거리 비교 조건을 `<`에서 `<=`로 변경하여 정확히 SearchRadius 거리의 적도 감지
+
+**4. 공격 시스템**
+- AttackRange(2 units) 내에 들어오면 공격 시작
+- AttackCooldown 시스템: 1초 쿨다운 (1 / AttackSpeed)
+- 데미지 적용 및 체력 감소
+- 체력 0 이하 시 IsAlive = false 설정 및 OnChampionDeath 시그널 발생
+
+**5. 타이밍 이슈 해결**
+- **핵심 문제**: ThinkTimer(0.5초)와 AttackCooldown(1초) 충돌
+  - ThinkTimer 만료 시에만 ProcessCombat 실행
+  - 첫 공격 후 0.5초 후 ThinkTimer 만료 → 아직 쿨다운 0.5초 남음 → 대기
+  - 다음 0.5초 후 쿨다운 만료되지만 ThinkTimer가 실행되지 않음 → 공격 안됨
+- **해결**: ThinkTimer는 타겟 찾기에만 사용, ProcessCombat는 매 프레임 실행
+```csharp
+// ThinkTimer는 타겟 찾기에만 사용 (0.5초마다)
+if (filter.AI->ThinkTimer <= FP._0)
+{
+    filter.AI->ThinkTimer = FP._0_50;
+    if (타겟 없음 || 타겟 죽음)
+    {
+        FindNewTarget(f, ref filter);
+    }
+}
+
+// 전투 처리는 매 프레임 실행 (AttackCooldown이 자체적으로 관리됨)
+if (filter.BattleState->CurrentTarget != EntityRef.None)
+{
+    ProcessCombat(f, ref filter);
+}
+```
+
+**6. 디버그 로그 정리**
+- 매 프레임마다 출력되는 불필요한 로그 주석 처리
+- 남은 중요 로그:
+  - 🎯 타겟 찾기 성공
+  - ⚔️ 공격 및 데미지
+  - 💀 챔피언 사망
+
+#### 주요 파일 수정
+
+**SimpleAISystem.cs** (`Assets/QuantumUser/Simulation/SimpleAISystem.cs`)
+- Update(): ThinkTimer와 ProcessCombat 분리
+- FindNewTarget(): 거리 비교 조건 수정 (`<=`)
+- ProcessCombat(): 매 프레임 실행, 이동/공격 로직
+- AttackTarget(): 데미지 적용 및 사망 처리
+
+**CharacterSelectSystem.cs, GamePhaseSystem.cs**
+- SelectTimer를 0.3초로 설정
+
+**BattleSystem.cs**
+- NavMeshSteeringAgent의 MaxSpeed 동적 설정 추가
+
+#### 기술적 상세
+
+**Photon Quantum 3 특성**:
+- 결정론적 시뮬레이션: Fixed Point(FP) 연산 사용
+- ECS 아키텍처: Entity + Component + System
+- SystemMainThreadFilter: 특정 컴포넌트 조합을 가진 엔티티만 필터링
+- 60 tick/sec 고정 프레임레이트 (f.DeltaTime ≈ 0.0166초)
+
+**컴포넌트 구조**:
+```
+Filter {
+    EntityRef Entity;
+    SimpleAI* AI;              // SearchRadius, AttackRange, ThinkTimer
+    BattleState* BattleState;  // Health, IsAlive, TeamId, AttackCooldown, CurrentTarget
+    Transform3D* Transform;    // Position
+    NavMeshPathfinder* Pathfinder;  // (사용 안 함, Filter 요구사항)
+}
+```
+
+**성능 이슈**:
+- 직접 Transform 조작으로 인한 떨림(jittering) 현상
+- View 레이어가 Simulation의 위치 변경을 부드럽게 보간하지 못함
+- 향후 EntityViewUpdater 설정 필요
+
+#### 테스트 결과
+- ✅ 챔피언 스폰 성공
+- ✅ 타겟 탐색 성공
+- ✅ 이동 시스템 작동
+- ✅ 공격 반복 실행
+- ✅ 쿨다운 시스템 정상 작동
+- ✅ 사망 처리 정상 작동
+- ⚠️ 움직임 떨림 현상 (View 레이어 이슈)
+
+#### 다음 단계
+1. View 레이어 보간 설정으로 움직임 부드럽게 개선
+2. 라운드 종료 조건 구현 (한 팀 전멸 시)
+3. 다음 라운드 자동 시작
+4. 3v3 전투 테스트
+
+## 이전 디버깅 히스토리
 
 ### 2025-11-07: 전투 시스템 네트워크 동기화 이슈 해결
 
