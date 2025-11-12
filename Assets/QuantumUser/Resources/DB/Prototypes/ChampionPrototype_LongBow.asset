@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -919360424, guid: b156eeaae3f741b40af66649a4748430, type: 3}
+  m_Name: ChampionPrototype_LongBow
+  m_EditorClassIdentifier: Quantum.Engine.dll::Quantum.EntityPrototype
+  Identifier:
+    Path: QuantumUser/Resources/DB/Prototypes/ChampionPrototype_LongBow
+    Guid:
+      Value: 325221172992908847
+  Container:
+    Components:
+    - rid: 7874515648943751297
+    - rid: 7874515648943751298
+    - rid: 7874515648943751299
+    - rid: 7874515648943751300
+  references:
+    version: 2
+    RefIds:
+    - rid: 7874515648943751297
+      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: 0
+          Y:
+            RawValue: 0
+          Z:
+            RawValue: 0
+        Rotation:
+          X:
+            RawValue: 0
+          Y:
+            RawValue: 0
+          Z:
+            RawValue: 0
+    - rid: 7874515648943751298
+      type: {class: NavMeshPathfinderPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        AgentConfig:
+          Id:
+            Value: 0
+        InitialTarget:
+          _hasValue: 0
+          _value:
+            X:
+              RawValue: 0
+            Y:
+              RawValue: 0
+            Z:
+              RawValue: 0
+        InitialTargetNavMesh:
+          Id:
+            Value: 0
+        InitialTargetNavMeshName: 
+    - rid: 7874515648943751299
+      type: {class: NavMeshSteeringAgentPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        OverrideMaxSpeed: 0
+        OverrideAcceleration: 0
+        MaxSpeed:
+          RawValue: 0
+        Acceleration:
+          RawValue: 0
+    - rid: 7874515648943751300
+      type: {class: ViewPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Current:
+          Id:
+            Value: 512127708886395948

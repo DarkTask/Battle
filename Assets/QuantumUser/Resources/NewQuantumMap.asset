@@ -19,9 +19,9 @@ MonoBehaviour:
   UserAsset:
     Id:
       Value: 0
-  Scene: BattleTestScene
-  ScenePath: Assets/QuantumUser/Scenes/BattleTest/BattleTestScene.unity
-  SceneGuid: 42a8e1d3752fc224d86887f9b7cfa946
+  Scene: BattleTestScene_2D
+  ScenePath: Assets/QuantumUser/Scenes/BattleTest/BattleTestScene_2D.unity
+  SceneGuid: 94f602cf036b44e095edb6b0e9a49ea4
   WorldSize: 256
   BucketsCount: 16
   BucketsSubdivisions: 8

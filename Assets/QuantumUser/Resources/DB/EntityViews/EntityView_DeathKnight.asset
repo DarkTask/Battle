@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 206745634, guid: b156eeaae3f741b40af66649a4748430, type: 3}
+  m_Name: EntityView_DeathKnight
+  m_EditorClassIdentifier: Quantum.Engine.dll::Quantum.EntityView
+  Identifier:
+    Path: QuantumUser/Resources/DB/EntityViews/EntityView_DeathKnight
+    Guid:
+      Value: 290534522966557675
+  Prefab: {fileID: 2372613535328650271, guid: b5f4b403c4ba39745bff3499e9e9d046, type: 3}

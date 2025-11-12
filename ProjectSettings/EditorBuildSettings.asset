@@ -6,12 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/QuantumUser/Scenes/BattleTest/BattleTestScene.unity
+    guid: 42a8e1d3752fc224d86887f9b7cfa946
+  - enabled: 0
     path: Assets/Photon/QuantumMenu/QuantumSampleMenu.unity
     guid: f23d3edd333e1dc449a4688e04123759
-  - enabled: 1
+  - enabled: 0
     path: Assets/QuantumUser/Scenes/QuantumGameScene.unity
     guid: 54adeefd7cfb0fe44b677039381f9ac2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Mirror/LTF_MirrorMultipleMatches.unity
     guid: d6b731d4c169209448ffaea0e76097ed
   - enabled: 0

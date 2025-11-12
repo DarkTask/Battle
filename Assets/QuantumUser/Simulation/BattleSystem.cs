@@ -181,11 +181,12 @@ namespace Quantum
             // Entity 생성
             var entity = f.Create(prototype);
 
-            // Transform 설정
+            // Transform 설정 (2D: Y축 0으로 고정)
             var spawnPos = config.GetSpawnPosition(teamId, slotIndex);
             if (f.Unsafe.TryGetPointer<Transform3D>(entity, out var transform))
             {
-                transform->Position = spawnPos;
+                // 2D 모드: Y축을 0으로 고정
+                transform->Position = new FPVector3(spawnPos.X, FP._0, spawnPos.Z);
                 transform->Rotation = FPQuaternion.Identity;
             }
 
@@ -215,7 +216,7 @@ namespace Quantum
             f.Add<SimpleAI>(entity);
             SimpleAI* ai = f.Unsafe.GetPointer<SimpleAI>(entity);
             ai->SearchRadius = FP.FromFloat_UNSAFE(20);  // 20 유닛 반경 내 적 탐색
-            ai->AttackRange = FP._2;    // 2 유닛 거리에서 공격
+            ai->AttackRange = FP.FromFloat_UNSAFE(0.6f);    // 0.6 유닛 거리에서 공격
             ai->ThinkTimer = FP._0;
 
             // NavMeshSteeringAgent 설정 (이동 속도)

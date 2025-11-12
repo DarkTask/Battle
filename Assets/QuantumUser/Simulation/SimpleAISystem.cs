@@ -144,10 +144,13 @@ namespace Quantum
             else
             {
                 // Log.Info($"🏃 {filter.Entity} MOVING to target (distance {distance} > range {filter.AI->AttackRange})");
-                // 타겟 방향으로 직접 이동
+                // 타겟 방향으로 직접 이동 (2D)
                 FPVector3 direction = (targetTransform.Position - filter.Transform->Position).Normalized;
                 FP moveSpeed = FP._10;  // 이동 속도
                 FPVector3 newPosition = filter.Transform->Position + direction * moveSpeed * f.DeltaTime;
+
+                // 2D 모드: Y축을 0으로 고정
+                newPosition.Y = FP._0;
 
                 filter.Transform->Position = newPosition;
             }

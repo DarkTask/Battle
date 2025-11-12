@@ -4,7 +4,10 @@
       "Bash(git checkout:*)",
       "Bash(powershell -Command:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(nul)",
+      "Bash(cp:*)",
+      "Bash(uuidgen:*)"
     ],
     "deny": [],
     "ask": []
