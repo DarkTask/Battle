@@ -20,6 +20,7 @@ namespace QuantumUser
         private Animator _animator;
         private int _teamId = -1;
         private FP _lastAttackCooldown = FP._0;
+        private FPVector3 _lastPosition;
 
         public override void OnActivate(Frame frame)
         {
@@ -29,34 +30,26 @@ namespace QuantumUser
 
             Debug.Log($"🔧 OnActivate: Animator={(_animator != null ? "Found" : "NULL")}, SpriteRenderer={(_spriteRenderer != null ? "Found" : "NULL")}");
 
+            // AnimationController 비활성화 (이 컴포넌트가 방향을 매 프레임 덮어쓰므로)
+            var animController = GetComponent<SmallScaleInc.TopDownPixelCharactersPack1.AnimationController>();
+            if (animController != null)
+            {
+                animController.enabled = false;
+                Debug.Log($"🚫 AnimationController disabled");
+            }
+
             // TeamId 가져오기
             if (frame.TryGet<BattleState>(EntityView.EntityRef, out var battleState))
             {
                 _teamId = battleState.TeamId;
 
                 // 팀에 따라 초기 방향 설정
-                if (_spriteRenderer != null)
-                {
-                    // Team 0 (왼쪽): 오른쪽 보기 (FlipX = false)
-                    // Team 1 (오른쪽): 왼쪽 보기 (FlipX = true)
-                    _spriteRenderer.flipX = (_teamId == 1);
+                // FlipX는 사용하지 않음 - 애니메이션 방향(isEast/isWest)으로만 제어
 
-                    Debug.Log($"💡 Sprite Flip set: TeamId={_teamId}, FlipX={_spriteRenderer.flipX}");
-                }
-            }
-
-            if (_animator != null)
-            {
-                Debug.Log($"   🎮 Animator has {_animator.parameters.Length} parameters");
-                // Animator 파라미터 확인 (처음 5개만 출력)
-                int count = 0;
-                foreach (var param in _animator.parameters)
+                // Animator 초기 설정 (AnimationController.Start()와 동일)
+                if (_animator != null)
                 {
-                    if (param.name.Contains("Attack") && count < 5)
-                    {
-                        Debug.Log($"   Animator param: {param.name} (type: {param.type})");
-                        count++;
-                    }
+                    StartCoroutine(InitializeAnimator());
                 }
             }
         }
@@ -81,22 +74,27 @@ namespace QuantumUser
                     0f                      // Unity Z는 항상 0 (2D)
                 );
 
-                // Quantum Rotation은 무시 (2D는 회전 없음 또는 Z축 회전만 사용)
+                // 이동 감지 (위치 변화 체크)
+                bool isMoving = FPVector3.Distance(quantumPos, _lastPosition) > FP._0_01;
+                _lastPosition = quantumPos;
+
+                // 달리기 애니메이션 제어
+                if (_animator != null)
+                {
+                    string direction = (_teamId == 0) ? "East" : "West";
+                    string moveParam = "Move" + direction;
+
+                    _animator.SetBool(moveParam, isMoving);
+                    _animator.SetBool("isRunning", isMoving);
+                }
             }
 
             // 공격 애니메이션 체크
             if (_animator != null && frame.TryGet<BattleState>(EntityView.EntityRef, out var battleState))
             {
-                // 디버그: 쿨다운 변화 추적 (주석 처리 - 로그가 너무 많음)
-                // if (_lastAttackCooldown != battleState.AttackCooldown)
-                // {
-                //     Debug.Log($"🔍 Cooldown changed: {_lastAttackCooldown.AsFloat:F2} -> {battleState.AttackCooldown.AsFloat:F2} (Entity={EntityView.EntityRef})");
-                // }
-
                 // AttackCooldown이 막 리셋되었을 때 = 공격이 방금 시작됨
                 if (_lastAttackCooldown <= FP._0 && battleState.AttackCooldown > FP._0)
                 {
-                    Debug.Log($"🎯 Attack detected! Cooldown: 0 -> {battleState.AttackCooldown.AsFloat:F2}");
                     PlayAttackAnimation();
                 }
 
@@ -106,98 +104,120 @@ namespace QuantumUser
 
         private void PlayAttackAnimation()
         {
-            Debug.Log($"🚀 PlayAttackAnimation CALLED! Animator={(_animator != null)}, TeamId={_teamId}");
-
             if (_animator == null)
             {
                 Debug.LogWarning($"❌ Animator is NULL! Cannot play attack animation.");
                 return;
             }
 
-            // Animator 상태 확인
-            bool hasController = _animator.runtimeAnimatorController != null;
-            string controllerName = hasController ? _animator.runtimeAnimatorController.name : "NULL";
-            Debug.Log($"🎬 Animator: enabled={_animator.enabled}, controller={controllerName}, gameObject={gameObject.name}");
+            // Team 0 (왼쪽 → 오른쪽): East
+            // Team 1 (오른쪽 → 왼쪽): West
+            string direction = (_teamId == 0) ? "East" : "West";
+            string isDirection = (_teamId == 0) ? "isEast" : "isWest";
+            string attackParam = "AttackAttack" + direction;
 
-            // Team 0 (왼쪽 → 오른쪽 공격): AttackAttackEast
-            // Team 1 (오른쪽 → 왼쪽 공격): AttackAttackWest
-            string attackTrigger = (_teamId == 0) ? "AttackAttackEast" : "AttackAttackWest";
-            Debug.Log($"   Looking for parameter: {attackTrigger}");
+            Debug.Log($"⚔️ Attack! Team={_teamId}, Direction={direction}, Params: {isDirection}+{attackParam}+isAttackAttacking");
 
-            // 파라미터 존재 여부 확인
-            bool parameterExists = false;
-            foreach (var param in _animator.parameters)
-            {
-                if (param.name == attackTrigger)
-                {
-                    parameterExists = true;
-                    Debug.Log($"   ✅ Found parameter: {attackTrigger} (type: {param.type})");
-                    break;
-                }
-            }
+            // AnimationController 방식 따르기:
+            // 1. 방향 설정
+            _animator.SetBool(isDirection, true);
 
-            if (!parameterExists)
-            {
-                Debug.LogError($"❌ Animator parameter '{attackTrigger}' NOT FOUND!");
-                return;
-            }
+            // 2. 공격 파라미터 설정 (AttackAttack + 방향)
+            _animator.SetBool(attackParam, true);
 
-            // 현재 Animator 상태 확인
-            if (_animator.layerCount > 0)
-            {
-                var currentState = _animator.GetCurrentAnimatorStateInfo(0);
-                Debug.Log($"   Current state: {currentState.fullPathHash}, normalizedTime: {currentState.normalizedTime}");
-            }
+            // 3. 공격 상태 플래그 설정
+            _animator.SetBool("isAttackAttacking", true);
 
-            // 공격 애니메이션이 재생되려면 다른 상태들을 먼저 false로 설정해야 함
-            // 이동 관련 Bool 파라미터들을 모두 false로 설정
-            string[] movementParams = { "isWalking", "isRunning", "isRunningBackwards",
-                                       "isStrafingLeft", "isStrafingRight", "isIdle" };
-            foreach (string param in movementParams)
-            {
-                if (HasParameter(_animator, param))
-                {
-                    _animator.SetBool(param, false);
-                }
-            }
-
-            // Bool 파라미터이므로 SetBool 사용 (Trigger가 아님!)
-            _animator.SetBool(attackTrigger, true);
-            Debug.Log($"⚔️ SetBool({attackTrigger}, true) EXECUTED!");
-
-            // Animator 강제 업데이트
-            _animator.Update(0f);
-
-            // 업데이트 후 상태 확인
-            if (_animator.layerCount > 0)
-            {
-                var afterState = _animator.GetCurrentAnimatorStateInfo(0);
-                Debug.Log($"   After SetBool: {afterState.fullPathHash}, normalizedTime: {afterState.normalizedTime}");
-            }
-
-            // 0.5초 후 자동으로 false로 리셋 (애니메이션이 끝나도록)
-            StartCoroutine(ResetAttackBool(attackTrigger));
+            // 0.5초 후 자동 리셋
+            StartCoroutine(ResetAttackParameters(isDirection, attackParam));
         }
 
-        private System.Collections.IEnumerator ResetAttackBool(string parameterName)
+        private System.Collections.IEnumerator InitializeAnimator()
         {
-            yield return new WaitForSeconds(0.5f);
+            // Animator의 런타임 컨트롤러가 완전히 초기화될 때까지 대기
+            yield return new WaitForEndOfFrame();
+
+            string initialDirection = (_teamId == 0) ? "isEast" : "isWest";
+
+            Debug.Log($"🔧 InitializeAnimator START - TeamId={_teamId}, Target={initialDirection}");
+
+            // Animator Controller 정보 확인
+            if (_animator.runtimeAnimatorController == null)
+            {
+                Debug.LogError($"❌ RuntimeAnimatorController is NULL!");
+                yield break;
+            }
+
+            Debug.Log($"   Controller: {_animator.runtimeAnimatorController.name}");
+            Debug.Log($"   Parameter count: {_animator.parameterCount}");
+
+            // 모든 파라미터 출력 (디버깅용 - 주석 처리)
+            // for (int i = 0; i < _animator.parameterCount; i++)
+            // {
+            //     var param = _animator.GetParameter(i);
+            //     Debug.Log($"   Param[{i}]: {param.name} (Type: {param.type})");
+            // }
+
+            // 최대 10번 시도 (Animator가 준비될 때까지)
+            bool success = false;
+            for (int attempt = 0; attempt < 10 && !success; attempt++)
+            {
+                // 모든 방향 Bool을 false로 초기화
+                _animator.SetBool("isWest", false);
+                _animator.SetBool("isEast", false);
+                _animator.SetBool("isSouth", false);
+                _animator.SetBool("isSouthWest", false);
+                _animator.SetBool("isNorthEast", false);
+                _animator.SetBool("isSouthEast", false);
+                _animator.SetBool("isNorth", false);
+                _animator.SetBool("isNorthWest", false);
+
+                // 이동 관련 Bool 초기화
+                _animator.SetBool("isWalking", false);
+                _animator.SetBool("isRunning", false);
+                _animator.SetBool("isCrouchRunning", false);
+                _animator.SetBool("isCrouchIdling", false);
+                _animator.SetBool("isRunningBackwards", false);
+                _animator.SetBool("isStrafingLeft", false);
+                _animator.SetBool("isStrafingRight", false);
+
+                // 초기 방향 설정
+                _animator.SetBool(initialDirection, true);
+
+                // Animator 업데이트 대기
+                yield return null;
+                yield return new WaitForEndOfFrame();
+
+                // 검증
+                success = _animator.GetBool(initialDirection);
+
+                if (!success)
+                {
+                    Debug.LogWarning($"⚠️ Attempt {attempt + 1}/10: {initialDirection} is still False");
+                }
+            }
+
+            // 최종 결과 로그
+            Debug.Log($"🎬 Animator initialized for Team {_teamId} ({(success ? "✅ Success" : "❌ Failed")}):");
+            Debug.Log($"   🎯 Target: {initialDirection} = {_animator.GetBool(initialDirection)}");
+            Debug.Log($"   Direction Bools: E={_animator.GetBool("isEast")}, W={_animator.GetBool("isWest")}, N={_animator.GetBool("isNorth")}, S={_animator.GetBool("isSouth")}");
+
+            if (!success)
+            {
+                Debug.LogError($"❌ CRITICAL: Failed to initialize Animator for Team {_teamId} after 10 attempts!");
+            }
+        }
+
+        private System.Collections.IEnumerator ResetAttackParameters(string isDirection, string attackParam)
+        {
+            yield return new WaitForSeconds(1.5f);
+
             if (_animator != null)
             {
-                _animator.SetBool(parameterName, false);
+                _animator.SetBool(attackParam, false);
+                _animator.SetBool("isAttackAttacking", false);
+                // 방향은 유지
             }
-        }
-
-        private bool HasParameter(Animator animator, string parameterName)
-        {
-            foreach (var param in animator.parameters)
-            {
-                if (param.name == parameterName)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }
