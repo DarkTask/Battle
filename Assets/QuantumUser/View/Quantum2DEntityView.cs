@@ -9,9 +9,9 @@ namespace QuantumUser
     /// Quantum XZ -> Unity XY
     ///
     /// 2D 배틀 특화 기능:
-    /// - Team 0 (왼쪽): 오른쪽을 바라봄 (FlipX = false)
-    /// - Team 1 (오른쪽): 왼쪽을 바라봄 (FlipX = true)
-    /// - 공격 시 애니메이션 재생 (AttackAttackEast/West)
+    /// - Team 0 (북서쪽): 남동쪽을 바라봄 (SouthEast)
+    /// - Team 1 (남동쪽): 북서쪽을 바라봄 (NorthWest)
+    /// - 공격 시 애니메이션 재생 (AttackAttackSouthEast/NorthWest)
     /// </summary>
     public class Quantum2DEntityView : QuantumEntityViewComponent
     {
@@ -21,6 +21,8 @@ namespace QuantumUser
         private int _teamId = -1;
         private FP _lastAttackCooldown = FP._0;
         private FPVector3 _lastPosition;
+        private int _activeCoroutineCount = 0;
+        private UnityEngine.Coroutine _currentResetCoroutine = null;
 
         public override void OnActivate(Frame frame)
         {
@@ -44,7 +46,7 @@ namespace QuantumUser
                 _teamId = battleState.TeamId;
 
                 // 팀에 따라 초기 방향 설정
-                // FlipX는 사용하지 않음 - 애니메이션 방향(isEast/isWest)으로만 제어
+                // FlipX는 사용하지 않음 - 애니메이션 방향(isSouthEast/isNorthWest)으로만 제어
 
                 // Animator 초기 설정 (AnimationController.Start()와 동일)
                 if (_animator != null)
@@ -81,7 +83,7 @@ namespace QuantumUser
                 // 달리기 애니메이션 제어
                 if (_animator != null)
                 {
-                    string direction = (_teamId == 0) ? "East" : "West";
+                    string direction = (_teamId == 0) ? "SouthEast" : "NorthWest";
                     string moveParam = "Move" + direction;
 
                     _animator.SetBool(moveParam, isMoving);
@@ -110,26 +112,23 @@ namespace QuantumUser
                 return;
             }
 
-            // Team 0 (왼쪽 → 오른쪽): East
-            // Team 1 (오른쪽 → 왼쪽): West
-            string direction = (_teamId == 0) ? "East" : "West";
-            string isDirection = (_teamId == 0) ? "isEast" : "isWest";
+            // 이전 리셋 코루틴이 실행 중이면 중단
+            if (_currentResetCoroutine != null)
+            {
+                StopCoroutine(_currentResetCoroutine);
+                _activeCoroutineCount--;
+            }
+
+            // Team 0 (북서쪽 → 남동쪽): SouthEast
+            // Team 1 (남동쪽 → 북서쪽): NorthWest
+            string direction = (_teamId == 0) ? "SouthEast" : "NorthWest";
+            string isDirection = (_teamId == 0) ? "isSouthEast" : "isNorthWest";
             string attackParam = "AttackAttack" + direction;
 
-            Debug.Log($"⚔️ Attack! Team={_teamId}, Direction={direction}, Params: {isDirection}+{attackParam}+isAttackAttacking");
+            _activeCoroutineCount++;
 
-            // AnimationController 방식 따르기:
-            // 1. 방향 설정
-            _animator.SetBool(isDirection, true);
-
-            // 2. 공격 파라미터 설정 (AttackAttack + 방향)
-            _animator.SetBool(attackParam, true);
-
-            // 3. 공격 상태 플래그 설정
-            _animator.SetBool("isAttackAttacking", true);
-
-            // 0.5초 후 자동 리셋
-            StartCoroutine(ResetAttackParameters(isDirection, attackParam));
+            // 코루틴으로 공격 애니메이션 재생
+            _currentResetCoroutine = StartCoroutine(PlayAttackAnimationCoroutine(isDirection, attackParam));
         }
 
         private System.Collections.IEnumerator InitializeAnimator()
@@ -137,7 +136,7 @@ namespace QuantumUser
             // Animator의 런타임 컨트롤러가 완전히 초기화될 때까지 대기
             yield return new WaitForEndOfFrame();
 
-            string initialDirection = (_teamId == 0) ? "isEast" : "isWest";
+            string initialDirection = (_teamId == 0) ? "isSouthEast" : "isNorthWest";
 
             Debug.Log($"🔧 InitializeAnimator START - TeamId={_teamId}, Target={initialDirection}");
 
@@ -208,16 +207,29 @@ namespace QuantumUser
             }
         }
 
-        private System.Collections.IEnumerator ResetAttackParameters(string isDirection, string attackParam)
+        private System.Collections.IEnumerator PlayAttackAnimationCoroutine(string isDirection, string attackParam)
         {
+            if (_animator == null) yield break;
+
+            // Animator.Play()로 직접 애니메이션 상태 재생
+            // 상태 이름 = 파라미터 이름과 동일 (예: "AttackAttackSouthEast")
+            string stateName = attackParam;
+
+            // 레이어 0에서 해당 상태를 0초(즉시)부터 재생, normalizedTime=0으로 처음부터 시작
+            _animator.Play(stateName, 0, 0f);
+
+            // 1.5초 후 Idle로 전환 (또는 파라미터 리셋)
             yield return new WaitForSeconds(1.5f);
 
+            // Idle 상태로 전환하기 위해 공격 파라미터 리셋
             if (_animator != null)
             {
                 _animator.SetBool(attackParam, false);
                 _animator.SetBool("isAttackAttacking", false);
-                // 방향은 유지
             }
+
+            _activeCoroutineCount--;
+            _currentResetCoroutine = null;
         }
     }
 }
