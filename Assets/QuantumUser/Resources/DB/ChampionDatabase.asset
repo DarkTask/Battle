@@ -12,4 +12,100 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff102dd31ed5a314ba35d4c80f64f6e3, type: 3}
   m_Name: ChampionDatabase
   m_EditorClassIdentifier: Assembly-CSharp::ChampionDatabase
-  champions: []
+  champions:
+  - id: 0
+    championName: Knight
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 12
+    dexterity: 8
+    constitution: 14
+    maxHealth: 120
+    attackPower: 12
+    moveSpeed: 4
+    isAlive: 1
+  - id: 1
+    championName: Archer
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 8
+    dexterity: 14
+    constitution: 8
+    maxHealth: 80
+    attackPower: 14
+    moveSpeed: 6
+    isAlive: 1
+  - id: 2
+    championName: Wizard
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 6
+    dexterity: 10
+    constitution: 8
+    maxHealth: 70
+    attackPower: 16
+    moveSpeed: 5
+    isAlive: 1
+  - id: 3
+    championName: Paladin
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 14
+    dexterity: 6
+    constitution: 16
+    maxHealth: 140
+    attackPower: 10
+    moveSpeed: 3
+    isAlive: 1
+  - id: 4
+    championName: CamoArcher
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 8
+    dexterity: 16
+    constitution: 6
+    maxHealth: 70
+    attackPower: 15
+    moveSpeed: 7
+    isAlive: 1
+  - id: 5
+    championName: Mage
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 6
+    dexterity: 12
+    constitution: 6
+    maxHealth: 60
+    attackPower: 18
+    moveSpeed: 5
+    isAlive: 1
+  - id: 6
+    championName: DeathKnight
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 16
+    dexterity: 8
+    constitution: 12
+    maxHealth: 110
+    attackPower: 14
+    moveSpeed: 4
+    isAlive: 1
+  - id: 7
+    championName: DarkLord
+    icon: {fileID: 0}
+    characterImage: {fileID: 0}
+    championPrefab: {fileID: 0}
+    strength: 14
+    dexterity: 10
+    constitution: 14
+    maxHealth: 130
+    attackPower: 16
+    moveSpeed: 4
+    isAlive: 1

@@ -15,31 +15,30 @@
 
 ---
 
-## 2. ChampionDatabase 설정 (8개 캐릭터)
+## 2. ChampionDatabase 설정 (8개 캐릭터) ✅ 완료
 
-**파일**: `Assets/QuantumUser/Resources/DB/ChampionDatabase.asset` (이미 생성됨)
+**파일**: `Assets/QuantumUser/Resources/DB/ChampionDatabase.asset`
 
-### 설정 단계
+### 이미 설정된 8개 캐릭터
 
-1. Project 창에서 ChampionDatabase.asset 선택
-2. Inspector에서 **Champions** 리스트 크기를 **8**로 설정
-3. 각 Element 0~7에 다음 정보 입력:
+| id | 이름 | STR | DEX | CON | HP | ATK | SPD |
+|----|------|-----|-----|-----|-----|-----|-----|
+| 0 | Knight | 12 | 8 | 14 | 120 | 12 | 4 |
+| 1 | Archer | 8 | 14 | 8 | 80 | 14 | 6 |
+| 2 | Wizard | 6 | 10 | 8 | 70 | 16 | 5 |
+| 3 | Paladin | 14 | 6 | 16 | 140 | 10 | 3 |
+| 4 | CamoArcher | 8 | 16 | 6 | 70 | 15 | 7 |
+| 5 | Mage | 6 | 12 | 6 | 60 | 18 | 5 |
+| 6 | DeathKnight | 16 | 8 | 12 | 110 | 14 | 4 |
+| 7 | DarkLord | 14 | 10 | 14 | 130 | 16 | 4 |
 
-| 필드 | 설명 | 필수 |
-|------|------|------|
-| id | 0~7 | ✅ |
-| championName | 캐릭터 이름 | ✅ |
-| icon | UI 카드에 표시할 스프라이트 | ✅ |
-| characterImage | 큰 이미지 (선택) | |
-| championPrefab | 프리팹 (선택) | |
-| strength | 기본값 10 | |
-| dexterity | 기본값 10 | |
-| constitution | 기본값 10 | |
-| maxHealth | 기본값 100 | |
-| attackPower | 기본값 10 | |
-| moveSpeed | 기본값 5 | |
+### 남은 작업: icon 스프라이트 연결 (선택)
 
-**주의**: Context Menu의 "Initialize 12 Champions"는 사용하지 말 것 (12개용)
+Unity 에디터에서 각 챔피언의 `icon` 필드에 스프라이트 연결:
+- 스프라이트 위치: `Assets/SmallScaleInt/TopDown 2D pixel Characters pack 1/Spritesheets/`
+- 각 캐릭터 폴더의 `Idle.png` 사용 추천
+
+**참고**: icon이 없어도 UI는 동작함 (빈 이미지로 표시)
 
 ---
 
