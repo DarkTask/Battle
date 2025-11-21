@@ -15,8 +15,8 @@ MonoBehaviour:
   champions:
   - id: 0
     championName: Knight
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: d4ae3e09ae98e4742a7c42afebdc18e3, type: 3}
+    characterImage: {fileID: 21300000, guid: d4ae3e09ae98e4742a7c42afebdc18e3, type: 3}
     championPrefab: {fileID: 0}
     strength: 12
     dexterity: 8
@@ -27,8 +27,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 1
     championName: Archer
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: 025635a9b46102d44a0a3d94190e985d, type: 3}
+    characterImage: {fileID: 21300000, guid: 025635a9b46102d44a0a3d94190e985d, type: 3}
     championPrefab: {fileID: 0}
     strength: 8
     dexterity: 14
@@ -39,8 +39,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 2
     championName: Wizard
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: a7680ede62b92774f81a140c222defe2, type: 3}
+    characterImage: {fileID: 21300000, guid: a7680ede62b92774f81a140c222defe2, type: 3}
     championPrefab: {fileID: 0}
     strength: 6
     dexterity: 10
@@ -51,8 +51,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 3
     championName: Paladin
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: 4640c38c080c6a043847a6ce552b8919, type: 3}
+    characterImage: {fileID: 21300000, guid: 4640c38c080c6a043847a6ce552b8919, type: 3}
     championPrefab: {fileID: 0}
     strength: 14
     dexterity: 6
@@ -63,8 +63,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 4
     championName: CamoArcher
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: 90f2da17c1bc64d4c8ee1fcfc98cf194, type: 3}
+    characterImage: {fileID: 21300000, guid: 90f2da17c1bc64d4c8ee1fcfc98cf194, type: 3}
     championPrefab: {fileID: 0}
     strength: 8
     dexterity: 16
@@ -75,8 +75,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 5
     championName: Mage
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: 0247e8c80a298d942bb86c5105f6bb58, type: 3}
+    characterImage: {fileID: 21300000, guid: 0247e8c80a298d942bb86c5105f6bb58, type: 3}
     championPrefab: {fileID: 0}
     strength: 6
     dexterity: 12
@@ -87,8 +87,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 6
     championName: DeathKnight
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: 9db6c41d36469eb4381ae744748feb16, type: 3}
+    characterImage: {fileID: 21300000, guid: 9db6c41d36469eb4381ae744748feb16, type: 3}
     championPrefab: {fileID: 0}
     strength: 16
     dexterity: 8
@@ -99,8 +99,8 @@ MonoBehaviour:
     isAlive: 1
   - id: 7
     championName: DarkLord
-    icon: {fileID: 0}
-    characterImage: {fileID: 0}
+    icon: {fileID: 21300000, guid: 1b46bd02b14995f489250c41a5d0913a, type: 3}
+    characterImage: {fileID: 21300000, guid: 1b46bd02b14995f489250c41a5d0913a, type: 3}
     championPrefab: {fileID: 0}
     strength: 14
     dexterity: 10

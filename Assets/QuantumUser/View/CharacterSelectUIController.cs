@@ -72,8 +72,9 @@ namespace QuantumUser
             // UI 초기화
             InitializeCharacterElements();
 
-            // Quantum 시그널 구독 (CallbackOnChampionSelected 사용)
-            // EventOnChampionSelected는 Quantum 코드 생성 후 사용 가능
+            // Quantum Event 구독
+            QuantumEvent.Subscribe<EventChampionSelectedEvent>(this, OnChampionSelectedEvent);
+            QuantumEvent.Subscribe<EventTurnChangedEvent>(this, OnTurnChangedEvent);
 
             isInitialized = true;
             Debug.Log("✅ CharacterSelectUIController 초기화 완료");
@@ -81,8 +82,47 @@ namespace QuantumUser
 
         void OnDestroy()
         {
-            // 시그널 구독 해제
-            // QuantumEvent.UnsubscribeListener(this);
+            // Event 구독 해제
+            QuantumEvent.UnsubscribeListener(this);
+        }
+
+        /// <summary>
+        /// 챔피언 선택 이벤트 콜백
+        /// </summary>
+        void OnChampionSelectedEvent(EventChampionSelectedEvent e)
+        {
+            int playerIndex = e.Player._index;  // 0 = PlayerA, 1 = PlayerB
+            int championId = e.ChampionId;
+            int turn = e.Turn;
+
+            Debug.Log($"🎯 ChampionSelectedEvent: Player={playerIndex}, ChampionId={championId}, Turn={turn}");
+
+            // 선택된 카드 비활성화
+            if (championId >= 0 && championId < characterElements.Length)
+            {
+                var element = characterElements[championId];
+                if (element != null)
+                {
+                    element.SetSelectedState(true, playerIndex);
+                }
+            }
+
+            // 플레이어 패널 업데이트
+            // TODO: 선택된 챔피언을 좌우 패널에 표시
+        }
+
+        /// <summary>
+        /// 턴 변경 이벤트 콜백
+        /// </summary>
+        void OnTurnChangedEvent(EventTurnChangedEvent e)
+        {
+            int turn = e.Turn;
+            int currentPlayer = e.CurrentPlayer;
+
+            Debug.Log($"🔄 TurnChangedEvent: Turn={turn}, CurrentPlayer={currentPlayer}");
+
+            _lastTurn = turn;
+            UpdateTurnDisplay(turn);
         }
 
         void Update()

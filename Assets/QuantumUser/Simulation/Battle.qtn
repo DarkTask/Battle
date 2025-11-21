@@ -67,6 +67,7 @@ component SpawnPoint {
 }
 
 // ===== Signals =====
+// Simulation 내부 통신용
 
 signal OnChampionSelected(PlayerRef player, Int32 championId);
 signal OnOrderSubmitted(PlayerRef player);
@@ -74,3 +75,21 @@ signal OnBattleStart(Int32 round);
 signal OnBattleEnd(Int32 winnerTeam);
 signal OnChampionDeath(EntityRef champion);
 signal OnPhaseChanged(Int32 newPhase);
+
+// ===== Events =====
+// Simulation → View 레이어 통신용 (Unity에서 구독 가능)
+
+event ChampionSelectedEvent {
+    PlayerRef Player;
+    Int32 ChampionId;
+    Int32 Turn;
+}
+
+event PhaseChangedEvent {
+    Int32 NewPhase;
+}
+
+event TurnChangedEvent {
+    Int32 Turn;
+    Int32 CurrentPlayer;  // 0 = PlayerA, 1 = PlayerB
+}

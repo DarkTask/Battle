@@ -80,8 +80,11 @@ namespace Quantum
 
             Log.Info($"✅ Champion selected: Player={player}, ChampionId={championId}, Count={playerData->SelectedCount}");
 
-            // 시그널 발생
+            // 시그널 발생 (Simulation 내부)
             f.Signals.OnChampionSelected(player, championId);
+
+            // 이벤트 발생 (View 레이어로 전달)
+            f.Events.ChampionSelectedEvent(player, championId, globals->SelectTurn);
 
             // 다음 턴으로
             NextTurn(f, globals);
@@ -117,6 +120,27 @@ namespace Quantum
         {
             globals->SelectTurn++;
             globals->SelectTimer = FP.FromFloat_UNSAFE(0.3f);  // 0.3초 리셋
+
+            // 턴 변경 이벤트 발생 (View 레이어로 전달)
+            int currentPlayer = GetCurrentPlayerIndex(globals->SelectTurn);
+            f.Events.TurnChangedEvent(globals->SelectTurn, currentPlayer);
+        }
+
+        /// <summary>
+        /// 턴에 해당하는 플레이어 인덱스 (0=A, 1=B)
+        /// </summary>
+        static int GetCurrentPlayerIndex(int turn)
+        {
+            switch (turn)
+            {
+                case 1: return 0;  // A
+                case 2: return 1;  // B
+                case 3: return 1;  // B
+                case 4: return 0;  // A
+                case 5: return 0;  // A
+                case 6: return 1;  // B
+                default: return -1;
+            }
         }
 
         /// <summary>

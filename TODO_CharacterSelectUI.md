@@ -42,20 +42,37 @@ Unity 에디터에서 각 챔피언의 `icon` 필드에 스프라이트 연결:
 
 ---
 
-## 3. Quantum 코드 생성 확인
+## 3. Quantum 코드 생성 확인 ✅ 완료
 
-**Quantum 3에서는 자동 생성됨**
+**생성된 코드 위치**: `Assets/QuantumUser/Simulation/Generated/`
+
+### 추가된 Event 정의 (Battle.qtn)
+
+```qtn
+event ChampionSelectedEvent {
+    PlayerRef Player;
+    Int32 ChampionId;
+    Int32 Turn;
+}
+
+event TurnChangedEvent {
+    Int32 Turn;
+    Int32 CurrentPlayer;  // 0 = PlayerA, 1 = PlayerB
+}
+```
+
+### CharacterSelectUIController에서 구독
+
+```csharp
+QuantumEvent.Subscribe<EventChampionSelectedEvent>(this, OnChampionSelectedEvent);
+QuantumEvent.Subscribe<EventTurnChangedEvent>(this, OnTurnChangedEvent);
+```
 
 ### 확인 방법
 
-1. `Assets/QuantumUser/Simulation/Battle.qtn` 파일 열기
-2. 아무 변경 없이 저장 (Ctrl+S)
-3. Unity가 자동으로 재컴파일
-
-### 생성된 코드 확인
-
-- 위치: `Assets/Photon/Quantum/Generated/`
-- `EventOnChampionSelected` 타입이 있는지 확인
+Unity 에디터에서 컴파일 후 다음 파일 확인:
+- `Assets/QuantumUser/Simulation/Generated/Quantum.CodeGen.Events.cs`
+- `EventChampionSelectedEvent`, `EventTurnChangedEvent` 클래스가 생성되어야 함
 
 ---
 
