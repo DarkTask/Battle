@@ -83,6 +83,7 @@ event ChampionSelectedEvent {
     PlayerRef Player;
     Int32 ChampionId;
     Int32 Turn;
+    Int32 PlayerIndex;  // 0 = PlayerA, 1 = PlayerB (명확한 인덱스)
 }
 
 event PhaseChangedEvent {

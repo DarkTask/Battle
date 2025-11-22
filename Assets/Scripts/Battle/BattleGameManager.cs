@@ -291,7 +291,9 @@ public class BattleGameManager : NetworkBehaviour
     {
         if (CharacterSelectUI.Instance != null)
         {
-            CharacterSelectUI.Instance.UpdateTurnDisplay(currentTurn);
+            // 홀수 턴 = Player A (0), 짝수 턴 = Player B (1)
+            int currentPlayer = (currentTurn - 1) % 2;
+            CharacterSelectUI.Instance.UpdateTurnDisplay(currentTurn, currentPlayer);
             CharacterSelectUI.Instance.UpdateTimer(turnTimer);
         }
     }

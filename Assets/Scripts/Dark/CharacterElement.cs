@@ -8,7 +8,7 @@ using static UnityEngine.UI.Image;
 
 public class CharacterElement : MonoBehaviour
 {
-    public MatchController matchController;
+    //public MatchController matchController;
 
     public Button button;
 
@@ -29,15 +29,15 @@ public class CharacterElement : MonoBehaviour
     /// </summary>
     void Start()
     {
-        matchController.DicCharacterElement.Add(index, this);
+        //matchController.DicCharacterElement.Add(index, this);
 
         button = GetComponent<Button>();
 
         button.onClick.AddListener(OnClick);
 
-        string result = image.sprite.name.Substring(0, image.sprite.name.IndexOf('_'));
+        //string result = image.sprite.name.Substring(0, image.sprite.name.IndexOf('_'));
 
-        name.text = result;
+        //name.text = result;
     }
 
     // Update is called once per frame
@@ -50,10 +50,17 @@ public class CharacterElement : MonoBehaviour
     [ClientCallback]
     private void OnClick()
     {
-        if (matchController.currentPlayer.isLocalPlayer)
-            matchController.CmdCharacterClick(index);
+        Debug.Log($"🖱️ {gameObject.name} (index={index}) Clicked");
 
-        Debug.Log(gameObject.name + " Character Element Clicked");
+        // Quantum 연동: CharacterSelectUI를 통해 선택 요청
+        if (CharacterSelectUI.Instance != null)
+        {
+            CharacterSelectUI.Instance.RequestSelectChampion(index);
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ CharacterSelectUI.Instance가 없습니다!");
+        }
     }
 
     [ClientCallback]

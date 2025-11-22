@@ -45,12 +45,17 @@ namespace Quantum
                 return false;
             }
 
-            // 현재 턴의 플레이어인지 확인
-            if (!IsCurrentTurnPlayer(f, globals, player))
+            // 현재 턴의 플레이어 가져오기 (싱글 플레이어 테스트용)
+            // 입력을 보낸 플레이어가 아닌, 현재 턴의 플레이어로 처리
+            PlayerRef currentTurnPlayer = GetCurrentTurnPlayer(f, globals);
+            if (currentTurnPlayer == PlayerRef.None)
             {
-                Log.Error($"Not your turn: player={player}, turn={globals->SelectTurn}");
+                Log.Error($"Invalid turn: {globals->SelectTurn}");
                 return false;
             }
+
+            // 싱글 플레이어 테스트: 현재 턴의 플레이어로 강제 설정
+            player = currentTurnPlayer;
 
             // 플레이어 데이터 가져오기
             var playerData = GetPlayerData(f, player);
@@ -84,7 +89,9 @@ namespace Quantum
             f.Signals.OnChampionSelected(player, championId);
 
             // 이벤트 발생 (View 레이어로 전달)
-            f.Events.ChampionSelectedEvent(player, championId, globals->SelectTurn);
+            int playerIndex = GetCurrentPlayerIndex(globals->SelectTurn);
+            Log.Info($"📤 Firing Event: Turn={globals->SelectTurn}, PlayerIndex={playerIndex}, ChampionId={championId}");
+            f.Events.ChampionSelectedEvent(player, championId, globals->SelectTurn, playerIndex);
 
             // 다음 턴으로
             NextTurn(f, globals);
@@ -119,7 +126,7 @@ namespace Quantum
         static void NextTurn(Frame f, _globals_* globals)
         {
             globals->SelectTurn++;
-            globals->SelectTimer = FP.FromFloat_UNSAFE(0.3f);  // 0.3초 리셋
+            globals->SelectTimer = FP.FromFloat_UNSAFE(10f);  // 10초 리셋 (테스트용)
 
             // 턴 변경 이벤트 발생 (View 레이어로 전달)
             int currentPlayer = GetCurrentPlayerIndex(globals->SelectTurn);
@@ -128,19 +135,12 @@ namespace Quantum
 
         /// <summary>
         /// 턴에 해당하는 플레이어 인덱스 (0=A, 1=B)
+        /// 턴 순서: A→B→A→B→A→B (번갈아가며)
         /// </summary>
         static int GetCurrentPlayerIndex(int turn)
         {
-            switch (turn)
-            {
-                case 1: return 0;  // A
-                case 2: return 1;  // B
-                case 3: return 1;  // B
-                case 4: return 0;  // A
-                case 5: return 0;  // A
-                case 6: return 1;  // B
-                default: return -1;
-            }
+            // 홀수 턴 = Player A (0), 짝수 턴 = Player B (1)
+            return (turn - 1) % 2;
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Quantum
 
         /// <summary>
         /// 현재 턴의 플레이어 가져오기
-        /// 턴 순서: A → B → B → A → A → B
+        /// 턴 순서: A→B→A→B→A→B (번갈아가며)
         /// </summary>
         static PlayerRef GetCurrentTurnPlayer(Frame f, _globals_* globals)
         {
@@ -164,20 +164,13 @@ namespace Quantum
             if (f.PlayerCount < 2)
                 return PlayerRef.None;
 
-            PlayerRef playerA = 0;
-            PlayerRef playerB = 1;
+            // 턴이 유효 범위 (1~6) 밖이면 None
+            if (turn < 1 || turn > 6)
+                return PlayerRef.None;
 
-            // 턴 매핑
-            switch (turn)
-            {
-                case 1: return playerA;
-                case 2: return playerB;
-                case 3: return playerB;
-                case 4: return playerA;
-                case 5: return playerA;
-                case 6: return playerB;
-                default: return PlayerRef.None;
-            }
+            // 홀수 턴 = Player A (0), 짝수 턴 = Player B (1)
+            int playerIndex = (turn - 1) % 2;
+            return playerIndex == 0 ? (PlayerRef)0 : (PlayerRef)1;
         }
 
         /// <summary>

@@ -52,7 +52,7 @@ namespace Quantum {
   public unsafe partial class Frame {
     public unsafe partial struct FrameEvents {
       static partial void GetEventTypeCountCodeGen(ref Int32 eventCount) {
-        eventCount = 1;
+        eventCount = 4;
       }
       static partial void GetParentEventIDCodeGen(Int32 eventID, ref Int32 parentEventID) {
         switch (eventID) {
@@ -61,8 +61,116 @@ namespace Quantum {
       }
       static partial void GetEventTypeCodeGen(Int32 eventID, ref System.Type result) {
         switch (eventID) {
+          case EventChampionSelectedEvent.ID: result = typeof(EventChampionSelectedEvent); return;
+          case EventPhaseChangedEvent.ID: result = typeof(EventPhaseChangedEvent); return;
+          case EventTurnChangedEvent.ID: result = typeof(EventTurnChangedEvent); return;
           default: break;
         }
+      }
+      public EventChampionSelectedEvent ChampionSelectedEvent(PlayerRef Player, Int32 ChampionId, Int32 Turn, Int32 PlayerIndex) {
+        var ev = _f.Context.AcquireEvent<EventChampionSelectedEvent>(EventChampionSelectedEvent.ID);
+        ev.Player = Player;
+        ev.ChampionId = ChampionId;
+        ev.Turn = Turn;
+        ev.PlayerIndex = PlayerIndex;
+        _f.AddEvent(ev);
+        return ev;
+      }
+      public EventPhaseChangedEvent PhaseChangedEvent(Int32 NewPhase) {
+        var ev = _f.Context.AcquireEvent<EventPhaseChangedEvent>(EventPhaseChangedEvent.ID);
+        ev.NewPhase = NewPhase;
+        _f.AddEvent(ev);
+        return ev;
+      }
+      public EventTurnChangedEvent TurnChangedEvent(Int32 Turn, Int32 CurrentPlayer) {
+        var ev = _f.Context.AcquireEvent<EventTurnChangedEvent>(EventTurnChangedEvent.ID);
+        ev.Turn = Turn;
+        ev.CurrentPlayer = CurrentPlayer;
+        _f.AddEvent(ev);
+        return ev;
+      }
+    }
+  }
+  public unsafe partial class EventChampionSelectedEvent : EventBase {
+    public new const Int32 ID = 1;
+    public PlayerRef Player;
+    public Int32 ChampionId;
+    public Int32 Turn;
+    public Int32 PlayerIndex;
+    protected EventChampionSelectedEvent(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventChampionSelectedEvent() : 
+        base(1, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 41;
+        hash = hash * 31 + Player.GetHashCode();
+        hash = hash * 31 + ChampionId.GetHashCode();
+        hash = hash * 31 + Turn.GetHashCode();
+        hash = hash * 31 + PlayerIndex.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventPhaseChangedEvent : EventBase {
+    public new const Int32 ID = 2;
+    public Int32 NewPhase;
+    protected EventPhaseChangedEvent(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventPhaseChangedEvent() : 
+        base(2, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 43;
+        hash = hash * 31 + NewPhase.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventTurnChangedEvent : EventBase {
+    public new const Int32 ID = 3;
+    public Int32 Turn;
+    public Int32 CurrentPlayer;
+    protected EventTurnChangedEvent(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventTurnChangedEvent() : 
+        base(3, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 47;
+        hash = hash * 31 + Turn.GetHashCode();
+        hash = hash * 31 + CurrentPlayer.GetHashCode();
+        return hash;
       }
     }
   }

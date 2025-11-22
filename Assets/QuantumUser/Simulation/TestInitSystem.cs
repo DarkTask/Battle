@@ -25,23 +25,48 @@ namespace Quantum
 
             Log.Info("🎮 [TestInitSystem] Initializing 2D Battle Test...");
 
-            // Player A 데이터 생성
-            CreatePlayerData(f, 0, 0, new int[] { 0, 1, 2 });  // Knight, Paladin, DeathKnight
+            // Player A, B 데이터 생성 (빈 상태로 - CharacterSelect에서 선택)
+            CreateEmptyPlayerData(f, 0, 0);  // Player A, Team 0
+            CreateEmptyPlayerData(f, 1, 1);  // Player B, Team 1
 
-            // Player B 데이터 생성
-            CreatePlayerData(f, 1, 1, new int[] { 3, 4, 5 });  // DarkLord, Archer, CamoArcher
+            // CharacterSelect 단계로 시작
+            f.Global->CurrentPhase = (int)GamePhaseSystem.Phase.CharacterSelect;
+            f.Global->SelectTurn = 1;  // 턴 1부터 시작 (Player A)
+            f.Global->SelectTimer = FP.FromFloat_UNSAFE(10f);  // 10초
+            f.Global->CurrentRound = 0;
+            f.Global->BattleTimer = FP._0;
 
-            // Battle 단계로 직접 시작
-            f.Global->CurrentPhase = (int)GamePhaseSystem.Phase.Battle;
-            f.Global->SelectTurn = 0;
-            f.Global->SelectTimer = FP._0;
-            f.Global->CurrentRound = 0;  // BattleSystem.OnPhaseChanged에서 1로 설정하고 스폰함
-            f.Global->BattleTimer = FP.FromFloat_UNSAFE(999f);
+            // 첫 번째 턴 이벤트 발생 (UI 초기화용)
+            f.Events.TurnChangedEvent(1, 0);  // Turn=1, CurrentPlayer=0 (Player A)
 
-            Log.Info("✅ [TestInitSystem] Initialization complete! Battle will start...");
+            Log.Info("✅ [TestInitSystem] Initialization complete! CharacterSelect will start...");
         }
 
-        void CreatePlayerData(Frame f, int playerRef, int teamId, int[] champions)
+        /// <summary>
+        /// CharacterSelect용 빈 Player 데이터 생성
+        /// </summary>
+        void CreateEmptyPlayerData(Frame f, int playerRef, int teamId)
+        {
+            var entity = f.Create();
+            f.Add<PlayerGameData>(entity);
+
+            var data = f.Unsafe.GetPointer<PlayerGameData>(entity);
+            data->PlayerRef = playerRef;
+            data->TeamId = teamId;
+            data->SelectedCount = 0;
+            data->OrderSubmitted = false;
+
+            // 빈 리스트 생성
+            data->SelectedChampions = f.AllocateList<int>();
+            data->BattleOrder = f.AllocateList<int>();
+
+            Log.Info($"✅ Player {playerRef} (Team {teamId}) created (empty - waiting for selection)");
+        }
+
+        /// <summary>
+        /// Battle 테스트용 - 미리 챔피언이 선택된 Player 데이터 생성
+        /// </summary>
+        void CreatePlayerDataWithChampions(Frame f, int playerRef, int teamId, int[] champions)
         {
             var entity = f.Create();
             f.Add<PlayerGameData>(entity);

@@ -106,7 +106,7 @@ namespace Quantum
             {
                 case Phase.CharacterSelect:
                     globals->SelectTurn = 1;
-                    globals->SelectTimer = FP.FromFloat_UNSAFE(0.3f);  // 0.3초
+                    globals->SelectTimer = FP.FromFloat_UNSAFE(10f);  // 10초 (테스트용)
                     break;
 
                 case Phase.OrderSetup:

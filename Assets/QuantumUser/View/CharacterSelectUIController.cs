@@ -76,14 +76,18 @@ namespace QuantumUser
             QuantumEvent.Subscribe<EventChampionSelectedEvent>(this, OnChampionSelectedEvent);
             QuantumEvent.Subscribe<EventTurnChangedEvent>(this, OnTurnChangedEvent);
 
+            // Quantum Input Callback 등록
+            QuantumCallback.Subscribe(this, (CallbackPollInput callback) => PollInput(callback));
+
             isInitialized = true;
-            Debug.Log("✅ CharacterSelectUIController 초기화 완료");
+            Debug.Log("✅ CharacterSelectUIController 초기화 완료 (Input Callback 등록됨)");
         }
 
         void OnDestroy()
         {
-            // Event 구독 해제
+            // Event 및 Callback 구독 해제
             QuantumEvent.UnsubscribeListener(this);
+            QuantumCallback.UnsubscribeListener(this);
         }
 
         /// <summary>
@@ -91,11 +95,12 @@ namespace QuantumUser
         /// </summary>
         void OnChampionSelectedEvent(EventChampionSelectedEvent e)
         {
-            int playerIndex = e.Player._index;  // 0 = PlayerA, 1 = PlayerB
+            // e.PlayerIndex 사용 (Quantum에서 직접 계산된 값)
+            int playerIndex = e.PlayerIndex;  // 0 = PlayerA, 1 = PlayerB
             int championId = e.ChampionId;
             int turn = e.Turn;
 
-            Debug.Log($"🎯 ChampionSelectedEvent: Player={playerIndex}, ChampionId={championId}, Turn={turn}");
+            Debug.Log($"🎯 ChampionSelectedEvent: Turn={turn}, PlayerIndex={playerIndex}, ChampionId={championId}");
 
             // 선택된 카드 비활성화
             if (championId >= 0 && championId < characterElements.Length)
@@ -122,7 +127,7 @@ namespace QuantumUser
             Debug.Log($"🔄 TurnChangedEvent: Turn={turn}, CurrentPlayer={currentPlayer}");
 
             _lastTurn = turn;
-            UpdateTurnDisplay(turn);
+            UpdateTurnDisplay(turn, currentPlayer);
         }
 
         void Update()
@@ -206,7 +211,9 @@ namespace QuantumUser
             if (globals->SelectTurn != _lastTurn)
             {
                 _lastTurn = globals->SelectTurn;
-                UpdateTurnDisplay(globals->SelectTurn);
+                // 홀수 턴 = Player A (0), 짝수 턴 = Player B (1)
+                int currentPlayer = (globals->SelectTurn - 1) % 2;
+                UpdateTurnDisplay(globals->SelectTurn, currentPlayer);
             }
 
             // 타이머 업데이트
@@ -216,29 +223,18 @@ namespace QuantumUser
         /// <summary>
         /// 턴 표시 업데이트
         /// </summary>
-        void UpdateTurnDisplay(int turn)
+        void UpdateTurnDisplay(int turn, int currentPlayer)
         {
             if (turnText == null)
                 return;
 
-            // 턴 순서: A → B → B → A → A → B
-            string playerName = "";
-            switch (turn)
-            {
-                case 1: playerName = "Player A"; break;
-                case 2: playerName = "Player B"; break;
-                case 3: playerName = "Player B"; break;
-                case 4: playerName = "Player A"; break;
-                case 5: playerName = "Player A"; break;
-                case 6: playerName = "Player B"; break;
-                default: playerName = "???"; break;
-            }
+            // currentPlayer: 0 = Player A, 1 = Player B
+            string playerName = currentPlayer == 0 ? "Player A" : "Player B";
 
             turnText.text = $"{playerName}의 차례 ({turn}/6)";
 
             // 색상 변경
-            bool isPlayerA = (turn == 1 || turn == 4 || turn == 5);
-            turnText.color = isPlayerA ? Color.red : Color.blue;
+            turnText.color = currentPlayer == 0 ? Color.red : Color.blue;
 
             Debug.Log($"🎯 Turn {turn}: {playerName}");
         }
@@ -268,25 +264,31 @@ namespace QuantumUser
         /// </summary>
         void OnChampionClicked(int championIndex)
         {
-            if (_game == null)
+            Debug.Log($"🖱️ Champion {championIndex} clicked - setting pending selection");
+
+            // 선택을 보류하고, PollInput에서 전달
+            _pendingChampionSelection = championIndex + 1;  // 0은 "선택 없음"이므로 +1
+        }
+
+        // Pending 선택 (0 = 선택 없음, 1~8 = championId 0~7)
+        private int _pendingChampionSelection = 0;
+
+        /// <summary>
+        /// Quantum Input Callback - 매 프레임 호출되어 Input 전달
+        /// </summary>
+        public void PollInput(CallbackPollInput callback)
+        {
+            Quantum.Input input = new Quantum.Input();
+
+            // 보류된 챔피언 선택이 있으면 전달
+            if (_pendingChampionSelection > 0)
             {
-                Debug.LogWarning("⚠️ Quantum Game이 준비되지 않았습니다!");
-                return;
+                input.SelectedChampionId = _pendingChampionSelection;
+                Debug.Log($"📤 Sending Input: SelectedChampionId={_pendingChampionSelection}");
+                _pendingChampionSelection = 0;  // 한 번만 전달
             }
 
-            Debug.Log($"🖱️ Champion {championIndex} clicked");
-
-            // Quantum Input으로 전달
-            // TODO: QuantumInput을 통해 선택 전달
-            // 현재는 직접 호출 (테스트용)
-            var frame = _game.Frames.Predicted;
-            if (frame != null)
-            {
-                // 로컬 플레이어 찾기 (테스트용으로 PlayerRef 0 사용)
-                PlayerRef localPlayer = 0; // TODO: 실제 로컬 플레이어 찾기
-
-                CharacterSelectSystem.SelectChampion(frame, localPlayer, championIndex);
-            }
+            callback.SetInput(input, DeterministicInputFlags.Repeatable);
         }
 
         // TODO: Quantum Signal 구독 추가
