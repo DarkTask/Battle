@@ -10,7 +10,7 @@ namespace Quantum
     [Serializable]
     public partial class BattleGameConfig : AssetObject
     {
-        public const int TOTAL_CHAMPIONS = 12;
+        public const int TOTAL_CHAMPIONS = 8;  // UI에 표시되는 챔피언 수 (0~7)
         public const int MAX_SELECTION = 3;
         public const int TOTAL_ROUNDS = 4;  // 1~3: 1v1, 4: 3v3
 

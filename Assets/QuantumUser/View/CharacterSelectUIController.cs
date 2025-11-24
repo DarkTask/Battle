@@ -46,6 +46,10 @@ namespace QuantumUser
         public TextMeshProUGUI turnText;  // GameText
         public TextMeshProUGUI timerText; // (없으면 null)
 
+        [Header("Battle Order UI")]
+        [Tooltip("BattleOrderUI 인스턴스 또는 프리팹 (Resources/Prefabs/UI/BattleOrderUI)")]
+        public BattleOrderUI battleOrderUI;
+
         [Header("Status")]
         public bool isInitialized = false;
 
@@ -55,6 +59,20 @@ namespace QuantumUser
         // 각 플레이어의 선택 카운트 추적
         private int _playerASelectCount = 0;
         private int _playerBSelectCount = 0;
+
+        // 각 플레이어가 선택한 챔피언 ID 저장
+        private int[] _playerASelectedChampions = new int[3] { -1, -1, -1 };
+        private int[] _playerBSelectedChampions = new int[3] { -1, -1, -1 };
+
+        /// <summary>
+        /// Player A가 선택한 챔피언 ID 배열 반환
+        /// </summary>
+        public int[] GetPlayerASelectedChampions() => _playerASelectedChampions;
+
+        /// <summary>
+        /// Player B가 선택한 챔피언 ID 배열 반환
+        /// </summary>
+        public int[] GetPlayerBSelectedChampions() => _playerBSelectedChampions;
 
         void Start()
         {
@@ -79,12 +97,16 @@ namespace QuantumUser
                 yield break;
             }
 
+            // BattleOrderUI 자동 로드 (없으면)
+            LoadBattleOrderUI();
+
             // UI 초기화
             InitializeCharacterElements();
 
             // Quantum Event 구독
             QuantumEvent.Subscribe<EventChampionSelectedEvent>(this, OnChampionSelectedEvent);
             QuantumEvent.Subscribe<EventTurnChangedEvent>(this, OnTurnChangedEvent);
+            QuantumEvent.Subscribe<EventPhaseChangedEvent>(this, OnPhaseChangedEvent);
 
             // Quantum Input Callback 등록
             QuantumCallback.Subscribe(this, (CallbackPollInput callback) => PollInput(callback));
@@ -98,6 +120,143 @@ namespace QuantumUser
             // Event 및 Callback 구독 해제
             QuantumEvent.UnsubscribeListener(this);
             QuantumCallback.UnsubscribeListener(this);
+        }
+
+        /// <summary>
+        /// BattleOrderUI 자동 로드
+        /// </summary>
+        void LoadBattleOrderUI()
+        {
+            // 이미 할당되어 있으면 스킵
+            if (battleOrderUI != null)
+            {
+                Debug.Log("✅ BattleOrderUI 이미 연결됨");
+                return;
+            }
+
+            // 씬에서 찾기
+            battleOrderUI = FindObjectOfType<BattleOrderUI>();
+            if (battleOrderUI != null)
+            {
+                Debug.Log("✅ BattleOrderUI 씬에서 찾음");
+                SetupBattleOrderUI();
+                return;
+            }
+
+            // Resources에서 로드
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/UI/BattleOrderUI");
+            if (prefab != null)
+            {
+                // Root Canvas 찾기 (최상위 Canvas)
+                Canvas rootCanvas = null;
+                Canvas[] allCanvases = FindObjectsOfType<Canvas>();
+                foreach (var c in allCanvases)
+                {
+                    // Root Canvas = 부모가 없거나 부모에 Canvas가 없는 Canvas
+                    if (c.isRootCanvas)
+                    {
+                        rootCanvas = c;
+                        break;
+                    }
+                }
+
+                if (rootCanvas != null)
+                {
+                    // Root Canvas 직접 자식으로 생성 (최상위 레벨)
+                    GameObject instance = Instantiate(prefab, rootCanvas.transform);
+
+                    // 가장 위에 렌더링되도록 sibling index 조정
+                    instance.transform.SetAsLastSibling();
+
+                    // 프리팹에 별도의 Canvas가 있으면 제거 (Root Canvas 사용)
+                    Canvas childCanvas = instance.GetComponent<Canvas>();
+                    if (childCanvas != null)
+                    {
+                        // Canvas 제거하면 CanvasScaler, GraphicRaycaster도 제거해야 함
+                        var scaler = instance.GetComponent<CanvasScaler>();
+                        var raycaster = instance.GetComponent<GraphicRaycaster>();
+                        if (scaler != null) Destroy(scaler);
+                        if (raycaster != null) Destroy(raycaster);
+                        Destroy(childCanvas);
+                        Debug.Log("🔧 BattleOrderUI의 중복 Canvas 제거됨");
+                    }
+
+                    battleOrderUI = instance.GetComponent<BattleOrderUI>();
+                    if (battleOrderUI != null)
+                    {
+                        SetupBattleOrderUI();
+                        Debug.Log($"✅ BattleOrderUI 프리팹에서 인스턴스화 완료 (Root Canvas: {rootCanvas.name})");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ Root Canvas를 찾을 수 없어 BattleOrderUI를 인스턴스화할 수 없습니다!");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Resources/Prefabs/UI/BattleOrderUI 프리팹을 찾을 수 없습니다!");
+            }
+        }
+
+        /// <summary>
+        /// BattleOrderUI 초기 설정
+        /// </summary>
+        void SetupBattleOrderUI()
+        {
+            if (battleOrderUI == null) return;
+
+            // ChampionDB 연결
+            if (battleOrderUI.championDB == null)
+            {
+                battleOrderUI.championDB = championDB;
+            }
+
+            // CharacterSelectPanel 연결
+            if (battleOrderUI.characterSelectPanel == null)
+            {
+                battleOrderUI.characterSelectPanel = characterSelectPanel;
+            }
+
+            Debug.Log("✅ BattleOrderUI 설정 완료");
+        }
+
+        /// <summary>
+        /// Phase 변경 이벤트 콜백
+        /// </summary>
+        void OnPhaseChangedEvent(EventPhaseChangedEvent e)
+        {
+            Debug.Log($"🎮 [CharacterSelectUI] PhaseChangedEvent: NewPhase={e.NewPhase}");
+
+            if (e.NewPhase == (int)GamePhaseSystem.Phase.OrderSetup)
+            {
+                // CharacterSelect UI의 내부 컨텐츠만 숨기기 (Choose_Character 패널)
+                HideCharacterSelectContent();
+
+                // BattleOrderUI가 없으면 로드
+                if (battleOrderUI == null)
+                {
+                    LoadBattleOrderUI();
+                }
+            }
+            else if (e.NewPhase == (int)GamePhaseSystem.Phase.Battle)
+            {
+                // Battle Phase로 전환 시 전체 UI 숨기기
+                characterSelectPanel?.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// CharacterSelect 관련 UI 숨기기 (Panels 전체)
+        /// BattleOrderUI는 별도의 오브젝트이므로 영향 없음
+        /// </summary>
+        void HideCharacterSelectContent()
+        {
+            if (characterSelectPanel == null) return;
+
+            // Panels 전체 숨기기 (BattleOrderUI는 별도 오브젝트)
+            characterSelectPanel.SetActive(false);
+            Debug.Log("🚪 CharacterSelect 패널(Panels) 숨김");
         }
 
         /// <summary>
@@ -158,6 +317,8 @@ namespace QuantumUser
                 // Player A (Panel_Left)
                 slotImages = playerASlotImages;
                 slotIndex = _playerASelectCount;
+                // 선택한 챔피언 ID 저장
+                if (slotIndex < 3) _playerASelectedChampions[slotIndex] = championId;
                 _playerASelectCount++;
                 Debug.Log($"🔧 Player A: slotImages.Length={slotImages?.Length ?? 0}, slotIndex={slotIndex}");
             }
@@ -166,6 +327,8 @@ namespace QuantumUser
                 // Player B (Panel_Right)
                 slotImages = playerBSlotImages;
                 slotIndex = _playerBSelectCount;
+                // 선택한 챔피언 ID 저장
+                if (slotIndex < 3) _playerBSelectedChampions[slotIndex] = championId;
                 _playerBSelectCount++;
                 Debug.Log($"🔧 Player B: slotImages.Length={slotImages?.Length ?? 0}, slotIndex={slotIndex}");
             }
@@ -274,20 +437,12 @@ namespace QuantumUser
             // Quantum의 Global 데이터에 포인터로 접근
             var globals = frame.Globals;
 
-            // CharacterSelect Phase가 아니면 UI 숨김
+            // CharacterSelect Phase가 아니면 업데이트 스킵 (UI는 숨기지 않음)
+            // NOTE: characterSelectPanel을 직접 숨기면 OrderPanel까지 같이 숨겨질 수 있음
+            // UI 숨기기는 각 패널에서 개별적으로 처리
             if (globals->CurrentPhase != (int)GamePhaseSystem.Phase.CharacterSelect)
             {
-                if (characterSelectPanel != null && characterSelectPanel.activeSelf)
-                {
-                    characterSelectPanel.SetActive(false);
-                }
                 return;
-            }
-
-            // UI 표시
-            if (characterSelectPanel != null && !characterSelectPanel.activeSelf)
-            {
-                characterSelectPanel.SetActive(true);
             }
 
             // 턴 업데이트
@@ -358,17 +513,31 @@ namespace QuantumUser
 
         /// <summary>
         /// Quantum Input Callback - 매 프레임 호출되어 Input 전달
+        /// CharacterSelect와 OrderSetup 모두 이 콜백에서 처리
         /// </summary>
         public void PollInput(CallbackPollInput callback)
         {
             Quantum.Input input = new Quantum.Input();
 
-            // 보류된 챔피언 선택이 있으면 전달
+            // 1. 캐릭터 선택 Input (CharacterSelect Phase)
             if (_pendingChampionSelection > 0)
             {
                 input.SelectedChampionId = _pendingChampionSelection;
                 Debug.Log($"📤 Sending Input: SelectedChampionId={_pendingChampionSelection}");
                 _pendingChampionSelection = 0;  // 한 번만 전달
+            }
+
+            // 2. 전투 순서 Input (OrderSetup Phase)
+            if (battleOrderUI != null && battleOrderUI.IsOrderInputPending())
+            {
+                int[] order = battleOrderUI.GetCurrentOrder();
+                input.OrderSlot1 = order[0];
+                input.OrderSlot2 = order[1];
+                input.OrderSlot3 = order[2];
+                input.OrderSubmit = true;
+
+                Debug.Log($"📤 Sending Order Input: [{order[0]}, {order[1]}, {order[2]}]");
+                battleOrderUI.ClearOrderInputPending();  // 한 번만 전달
             }
 
             callback.SetInput(input, DeterministicInputFlags.Repeatable);

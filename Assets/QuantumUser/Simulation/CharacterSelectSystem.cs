@@ -112,12 +112,41 @@ namespace Quantum
                 return;
             }
 
-            // 테스트용: 항상 첫 번째 챔피언 (championId 0) 선택
-            // 중복 선택이 허용되므로 계속 같은 챔피언 선택 가능
-            int championId = 0;  // Warrior
+            // 랜덤으로 선택되지 않은 챔피언 찾기
+            int championId = FindRandomUnselectedChampion(f);
+            if (championId < 0)
+            {
+                // 모든 챔피언이 선택됨 - 완전 랜덤 선택
+                championId = f.RNG->Next(0, BattleGameConfig.TOTAL_CHAMPIONS);
+            }
 
             Log.Info($"⏰ Auto selecting champion {championId} for player {currentPlayer}");
             SelectChampion(f, currentPlayer, championId);
+        }
+
+        /// <summary>
+        /// 랜덤으로 선택되지 않은 챔피언 찾기
+        /// </summary>
+        static int FindRandomUnselectedChampion(Frame f)
+        {
+            // 선택되지 않은 챔피언 목록 수집
+            int unselectedCount = 0;
+            Span<int> unselected = stackalloc int[BattleGameConfig.TOTAL_CHAMPIONS];
+
+            for (int i = 0; i < BattleGameConfig.TOTAL_CHAMPIONS; i++)
+            {
+                if (!IsChampionAlreadySelected(f, i))
+                {
+                    unselected[unselectedCount++] = i;
+                }
+            }
+
+            if (unselectedCount == 0)
+                return -1;
+
+            // 랜덤 선택
+            int randomIndex = f.RNG->Next(0, unselectedCount);
+            return unselected[randomIndex];
         }
 
         /// <summary>
@@ -160,15 +189,13 @@ namespace Quantum
         {
             int turn = globals->SelectTurn;
 
-            // 플레이어 목록 (PlayerRef는 0부터 시작)
-            if (f.PlayerCount < 2)
-                return PlayerRef.None;
-
             // 턴이 유효 범위 (1~6) 밖이면 None
             if (turn < 1 || turn > 6)
                 return PlayerRef.None;
 
             // 홀수 턴 = Player A (0), 짝수 턴 = Player B (1)
+            // NOTE: 싱글 플레이어 테스트에서 f.PlayerCount가 1이어도
+            // PlayerGameData 엔티티는 2개 존재하므로 턴 기반으로만 판단
             int playerIndex = (turn - 1) % 2;
             return playerIndex == 0 ? (PlayerRef)0 : (PlayerRef)1;
         }

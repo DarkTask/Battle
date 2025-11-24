@@ -14,14 +14,34 @@ namespace Quantum
             if (globals->CurrentPhase != (int)GamePhaseSystem.Phase.OrderSetup)
                 return;
 
-            // 자동 제출 (테스트용)
-            AutoSubmitOrders(f);
+            // 싱글 플레이어 테스트: Player B (상대방) 자동 제출
+            AutoSubmitForOpponent(f);
 
             // 양쪽 플레이어가 모두 제출했는지 확인
             if (AreBothPlayersReady(f))
             {
                 // 전투 시작
+                Log.Info("✅ Both players submitted orders! Starting battle...");
                 GamePhaseSystem.ChangePhase(f, globals, GamePhaseSystem.Phase.Battle);
+            }
+        }
+
+        /// <summary>
+        /// 싱글 플레이어 테스트용: Player B (상대방) 만 자동 제출
+        /// Player A는 BattleOrderUI에서 직접 제출
+        /// </summary>
+        static void AutoSubmitForOpponent(Frame f)
+        {
+            var filter = f.Filter<PlayerGameData>();
+            while (filter.NextUnsafe(out var entity, out var data))
+            {
+                // Player B (PlayerRef == 1) 만 자동 제출
+                // Player A (PlayerRef == 0) 는 UI에서 제출
+                if (!data->OrderSubmitted && data->PlayerRef == 1)
+                {
+                    SubmitOrder(f, data->PlayerRef, 0, 1, 2);
+                    Log.Info($"⏰ Auto submitted order for Player B (opponent)");
+                }
             }
         }
 

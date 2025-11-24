@@ -100,6 +100,7 @@ namespace Quantum
 
             Log.Info($"🎮 Phase Changed: {(Phase)oldPhase} → {newPhase}");
             f.Signals.OnPhaseChanged((int)newPhase);
+            f.Events.PhaseChangedEvent((int)newPhase);  // View 레이어로 이벤트 전달
 
             // 페이즈 전환 시 초기화 작업
             switch (newPhase)
