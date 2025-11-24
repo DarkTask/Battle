@@ -33,7 +33,9 @@ public class CharacterElement : MonoBehaviour
 
         button = GetComponent<Button>();
 
-        button.onClick.AddListener(OnClick);
+        // NOTE: 버튼 클릭 이벤트는 CharacterSelectUIController.InitializeCharacterElements()에서 등록됨
+        // 여기서 중복 등록하면 충돌할 수 있으므로 제거
+        // button.onClick.AddListener(OnClick);
 
         //string result = image.sprite.name.Substring(0, image.sprite.name.IndexOf('_'));
 
@@ -47,20 +49,13 @@ public class CharacterElement : MonoBehaviour
         // 필요시 캐릭터 상태 업데이트 로직을 여기에 추가할 수 있습니다.
     }
 
-    [ClientCallback]
     private void OnClick()
     {
         Debug.Log($"🖱️ {gameObject.name} (index={index}) Clicked");
 
-        // Quantum 연동: CharacterSelectUI를 통해 선택 요청
-        if (CharacterSelectUI.Instance != null)
-        {
-            CharacterSelectUI.Instance.RequestSelectChampion(index);
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ CharacterSelectUI.Instance가 없습니다!");
-        }
+        // NOTE: CharacterSelectUIController.InitializeCharacterElements()에서
+        // 버튼 클릭 이벤트를 직접 등록하므로 여기서는 로그만 출력
+        // Quantum Input은 CharacterSelectUIController.OnChampionClicked()에서 처리됨
     }
 
     [ClientCallback]

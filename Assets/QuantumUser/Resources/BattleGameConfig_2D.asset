@@ -20,21 +20,19 @@ MonoBehaviour:
   - Id:
       Value: 311319287001187217
   - Id:
+      Value: 279082359185121900
+  - Id:
+      Value: 419427596744139733
+  - Id:
       Value: 531298972886160088
+  - Id:
+      Value: 352465703902301135
+  - Id:
+      Value: 359678850869196095
   - Id:
       Value: 501466513503307341
   - Id:
       Value: 463489195885339694
-  - Id:
-      Value: 279082359185121900
-  - Id:
-      Value: 352465703902301135
-  - Id:
-      Value: 325221172992908847
-  - Id:
-      Value: 359678850869196095
-  - Id:
-      Value: 419427596744139733
   SelectTimeLimit:
     RawValue: 19660
   BattleTimeLimit:
