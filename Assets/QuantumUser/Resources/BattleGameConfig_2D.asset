@@ -39,38 +39,38 @@ MonoBehaviour:
     RawValue: 65470464
   SpawnPositions:
   - X:
-      RawValue: -327680
+      RawValue: -111411
     Y:
-      RawValue: 0
+      RawValue: 91750
     Z:
-      RawValue: 327680
+      RawValue: 91750
   - X:
-      RawValue: -393216
+      RawValue: -111411
     Y:
-      RawValue: 0
+      RawValue: 91750
     Z:
-      RawValue: 262144
+      RawValue: 91750
   - X:
-      RawValue: -262144
+      RawValue: -111411
     Y:
-      RawValue: 0
+      RawValue: 91750
     Z:
-      RawValue: 393216
+      RawValue: 91750
   - X:
-      RawValue: 327680
+      RawValue: 111411
     Y:
-      RawValue: 0
+      RawValue: -91750
     Z:
-      RawValue: -327680
+      RawValue: -91750
   - X:
-      RawValue: 393216
+      RawValue: 111411
     Y:
-      RawValue: 0
+      RawValue: -91750
     Z:
-      RawValue: -262144
+      RawValue: -91750
   - X:
-      RawValue: 262144
+      RawValue: 111411
     Y:
-      RawValue: 0
+      RawValue: -91750
     Z:
-      RawValue: -393216
+      RawValue: -91750

@@ -226,7 +226,7 @@ namespace Quantum
             stats->MaxHealth = FP._10;  // 임시값: 10 HP
             stats->AttackPower = FP._2;  // 2 데미지
             stats->AttackSpeed = FP._1;  // 1초당 1회 공격
-            stats->MoveSpeed = FP._3;    // 이동속도 3
+            stats->MoveSpeed = FP._2;    // 이동속도 2 (ChampionDatabase와 일치)
 
             // BattleState 컴포넌트 추가 및 설정
             f.Add<BattleState>(entity);

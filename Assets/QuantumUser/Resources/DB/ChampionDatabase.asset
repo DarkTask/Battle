@@ -23,7 +23,7 @@ MonoBehaviour:
     constitution: 14
     maxHealth: 120
     attackPower: 12
-    moveSpeed: 4
+    moveSpeed: 2
     isAlive: 1
   - id: 1
     championName: Archer
@@ -35,7 +35,7 @@ MonoBehaviour:
     constitution: 8
     maxHealth: 80
     attackPower: 14
-    moveSpeed: 6
+    moveSpeed: 2
     isAlive: 1
   - id: 2
     championName: Wizard
@@ -47,7 +47,7 @@ MonoBehaviour:
     constitution: 8
     maxHealth: 70
     attackPower: 16
-    moveSpeed: 5
+    moveSpeed: 2
     isAlive: 1
   - id: 3
     championName: Paladin
@@ -59,7 +59,7 @@ MonoBehaviour:
     constitution: 16
     maxHealth: 140
     attackPower: 10
-    moveSpeed: 3
+    moveSpeed: 2
     isAlive: 1
   - id: 4
     championName: CamoArcher
@@ -71,7 +71,7 @@ MonoBehaviour:
     constitution: 6
     maxHealth: 70
     attackPower: 15
-    moveSpeed: 7
+    moveSpeed: 2
     isAlive: 1
   - id: 5
     championName: Mage
@@ -83,7 +83,7 @@ MonoBehaviour:
     constitution: 6
     maxHealth: 60
     attackPower: 18
-    moveSpeed: 5
+    moveSpeed: 2
     isAlive: 1
   - id: 6
     championName: DeathKnight
@@ -95,7 +95,7 @@ MonoBehaviour:
     constitution: 12
     maxHealth: 110
     attackPower: 14
-    moveSpeed: 4
+    moveSpeed: 2
     isAlive: 1
   - id: 7
     championName: DarkLord
@@ -107,5 +107,5 @@ MonoBehaviour:
     constitution: 14
     maxHealth: 130
     attackPower: 16
-    moveSpeed: 4
+    moveSpeed: 2
     isAlive: 1
