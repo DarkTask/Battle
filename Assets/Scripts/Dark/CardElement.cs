@@ -8,7 +8,7 @@ using static UnityEngine.UI.Image;
 
 public class CardElement : MonoBehaviour
 {
-    public MatchController matchController;
+    //public MatchController matchController;
 
     //public Button button;
 
@@ -28,15 +28,15 @@ public class CardElement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if (matchController.DicCardElement.ContainsKey(player) == false)
-        {
-            matchController.DicCardElement.Add(player, new System.Collections.Generic.List<CardElement>());
-            matchController.DicCardElement[player].Add(this);
-        }
-        else
-        {
-            matchController.DicCardElement[player].Add(this);
-        }
+        //if (matchController.DicCardElement.ContainsKey(player) == false)
+        //{
+        //    matchController.DicCardElement.Add(player, new System.Collections.Generic.List<CardElement>());
+        //    matchController.DicCardElement[player].Add(this);
+        //}
+        //else
+        //{
+        //    matchController.DicCardElement[player].Add(this);
+        //}
 
         Debug.Log("matchController.DicCardElement : " + index);
 
