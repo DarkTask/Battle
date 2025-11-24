@@ -80,10 +80,19 @@ namespace Quantum
             // }
 
             // 선택 처리
-            f.ResolveList(playerData->SelectedChampions).Add(championId);
+            var selectedList = f.ResolveList(playerData->SelectedChampions);
+            selectedList.Add(championId);
             playerData->SelectedCount++;
 
+            // 현재 선택된 챔피언 목록 로그
+            string selectedStr = "[";
+            for (int i = 0; i < selectedList.Count; i++)
+            {
+                selectedStr += selectedList[i] + (i < selectedList.Count - 1 ? ", " : "");
+            }
+            selectedStr += "]";
             Log.Info($"✅ Champion selected: Player={player}, ChampionId={championId}, Count={playerData->SelectedCount}");
+            Log.Info($"   SelectedChampions now = {selectedStr}");
 
             // 시그널 발생 (Simulation 내부)
             f.Signals.OnChampionSelected(player, championId);

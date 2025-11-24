@@ -103,7 +103,17 @@ namespace Quantum
                     battleOrder.Add(slot3);
                     data->OrderSubmitted = true;
 
+                    // SelectedChampions 현재 상태 확인
+                    var selectedChampions = f.ResolveList(data->SelectedChampions);
+                    string selectedStr = "[";
+                    for (int i = 0; i < selectedChampions.Count; i++)
+                    {
+                        selectedStr += selectedChampions[i] + (i < selectedChampions.Count - 1 ? ", " : "");
+                    }
+                    selectedStr += "]";
+
                     Log.Info($"✅ Order submitted: Player={player}, Order=[{slot1}, {slot2}, {slot3}]");
+                    Log.Info($"   BattleOrder.Count={battleOrder.Count}, SelectedChampions={selectedStr}");
 
                     f.Signals.OnOrderSubmitted(player);
                     return true;

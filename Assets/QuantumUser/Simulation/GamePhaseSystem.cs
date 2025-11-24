@@ -93,6 +93,45 @@ namespace Quantum
             // 일정 시간 후 다시 CharacterSelect로 (재대결)
         }
 
+        /// <summary>
+        /// 모든 PlayerGameData 상태 로그 출력
+        /// </summary>
+        static void LogAllPlayerData(Frame f)
+        {
+            Log.Info("🔍 ========== Battle Start - PlayerGameData Status ==========");
+
+            var filter = f.Filter<PlayerGameData>();
+            while (filter.NextUnsafe(out var entity, out var data))
+            {
+                var selectedChampions = f.ResolveList(data->SelectedChampions);
+                var battleOrder = f.ResolveList(data->BattleOrder);
+
+                // SelectedChampions 목록
+                string selectedStr = "[";
+                for (int i = 0; i < selectedChampions.Count; i++)
+                {
+                    selectedStr += selectedChampions[i] + (i < selectedChampions.Count - 1 ? ", " : "");
+                }
+                selectedStr += "]";
+
+                // BattleOrder 목록
+                string orderStr = "[";
+                for (int i = 0; i < battleOrder.Count; i++)
+                {
+                    orderStr += battleOrder[i] + (i < battleOrder.Count - 1 ? ", " : "");
+                }
+                orderStr += "]";
+
+                Log.Info($"Player {data->PlayerRef} (Team {data->TeamId}):");
+                Log.Info($"   SelectedCount = {data->SelectedCount}");
+                Log.Info($"   SelectedChampions ({selectedChampions.Count}) = {selectedStr}");
+                Log.Info($"   BattleOrder ({battleOrder.Count}) = {orderStr}");
+                Log.Info($"   OrderSubmitted = {data->OrderSubmitted}");
+            }
+
+            Log.Info("🔍 ============================================================");
+        }
+
         public static void ChangePhase(Frame f, _globals_* globals, Phase newPhase)
         {
             var oldPhase = globals->CurrentPhase;
@@ -117,6 +156,8 @@ namespace Quantum
                 case Phase.Battle:
                     globals->CurrentRound = 1;
                     globals->BattleTimer = FP.FromFloat_UNSAFE(60);  // 60초
+                    // Battle 시작 전 모든 PlayerGameData 상태 확인
+                    LogAllPlayerData(f);
                     break;
 
                 case Phase.Result:

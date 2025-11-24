@@ -110,6 +110,32 @@ namespace Quantum
                 // 디버그 로그
                 Log.Info($"🐛 Round {round}: Player={data->PlayerRef}, TeamId={data->TeamId}");
                 Log.Info($"   BattleOrder Count={battleOrder.Count}, SelectedChampions Count={selectedChampions.Count}");
+
+                // BattleOrder 내용 전체 출력
+                string battleOrderStr = "[";
+                for (int i = 0; i < battleOrder.Count; i++)
+                {
+                    battleOrderStr += battleOrder[i] + (i < battleOrder.Count - 1 ? ", " : "");
+                }
+                battleOrderStr += "]";
+                Log.Info($"   BattleOrder = {battleOrderStr}");
+
+                // SelectedChampions 내용 전체 출력
+                string selectedStr = "[";
+                for (int i = 0; i < selectedChampions.Count; i++)
+                {
+                    selectedStr += selectedChampions[i] + (i < selectedChampions.Count - 1 ? ", " : "");
+                }
+                selectedStr += "]";
+                Log.Info($"   SelectedChampions = {selectedStr}");
+
+                // slotIndex가 BattleOrder 범위 내인지 확인
+                if (slotIndex >= battleOrder.Count)
+                {
+                    Log.Error($"❌ slotIndex={slotIndex} >= BattleOrder.Count={battleOrder.Count}!");
+                    continue;
+                }
+
                 Log.Info($"   slotIndex={slotIndex}, BattleOrder[{slotIndex}]={battleOrder[slotIndex]}");
 
                 int championIndex = battleOrder[slotIndex];

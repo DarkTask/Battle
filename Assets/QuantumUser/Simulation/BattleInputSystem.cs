@@ -26,6 +26,7 @@ namespace Quantum
             // 전투 순서 제출 Input
             if (input->OrderSubmit.WasPressed)
             {
+                Log.Info($"📥 OrderSubmit Input received: Player={filter.PlayerData->PlayerRef}, Slots=[{input->OrderSlot1}, {input->OrderSlot2}, {input->OrderSlot3}]");
                 OrderSetupSystem.SubmitOrder(f, filter.PlayerData->PlayerRef,
                     input->OrderSlot1, input->OrderSlot2, input->OrderSlot3);
             }
