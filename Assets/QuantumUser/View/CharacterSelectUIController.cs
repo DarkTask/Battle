@@ -36,6 +36,12 @@ namespace QuantumUser
         public Transform playerAPanel;  // Panel_Left
         public Transform playerBPanel;  // Panel_Right
 
+        [Header("Player A Slots (Card_Red 0~2 -> Character_Mask -> Character)")]
+        public Image[] playerASlotImages = new Image[3];
+
+        [Header("Player B Slots (Card_Blue 0~2 -> Character_Mask -> Character)")]
+        public Image[] playerBSlotImages = new Image[3];
+
         [Header("UI Text")]
         public TextMeshProUGUI turnText;  // GameText
         public TextMeshProUGUI timerText; // (없으면 null)
@@ -45,6 +51,10 @@ namespace QuantumUser
 
         private QuantumGame _game;
         private int _lastTurn = -1;
+
+        // 각 플레이어의 선택 카운트 추적
+        private int _playerASelectCount = 0;
+        private int _playerBSelectCount = 0;
 
         void Start()
         {
@@ -112,8 +122,81 @@ namespace QuantumUser
                 }
             }
 
-            // 플레이어 패널 업데이트
-            // TODO: 선택된 챔피언을 좌우 패널에 표시
+            // 플레이어 패널 슬롯 이미지 업데이트
+            UpdatePlayerSlot(playerIndex, championId);
+        }
+
+        /// <summary>
+        /// 플레이어 슬롯에 선택된 챔피언 이미지 표시
+        /// </summary>
+        void UpdatePlayerSlot(int playerIndex, int championId)
+        {
+            Debug.Log($"🔧 UpdatePlayerSlot 호출: playerIndex={playerIndex}, championId={championId}");
+
+            // 챔피언 데이터 가져오기
+            if (championDB == null)
+            {
+                Debug.LogWarning("⚠️ ChampionDatabase가 없습니다!");
+                return;
+            }
+
+            ChampionData champion = championDB.GetChampion(championId);
+            if (champion == null)
+            {
+                Debug.LogWarning($"⚠️ Champion {championId}를 찾을 수 없습니다!");
+                return;
+            }
+
+            Debug.Log($"🔧 Champion 찾음: {champion.championName}, characterImage={(champion.characterImage != null ? "있음" : "없음")}");
+
+            // 플레이어별 슬롯 배열과 카운트 선택
+            Image[] slotImages;
+            int slotIndex;
+
+            if (playerIndex == 0)
+            {
+                // Player A (Panel_Left)
+                slotImages = playerASlotImages;
+                slotIndex = _playerASelectCount;
+                _playerASelectCount++;
+                Debug.Log($"🔧 Player A: slotImages.Length={slotImages?.Length ?? 0}, slotIndex={slotIndex}");
+            }
+            else
+            {
+                // Player B (Panel_Right)
+                slotImages = playerBSlotImages;
+                slotIndex = _playerBSelectCount;
+                _playerBSelectCount++;
+                Debug.Log($"🔧 Player B: slotImages.Length={slotImages?.Length ?? 0}, slotIndex={slotIndex}");
+            }
+
+            // 슬롯 범위 체크
+            if (slotImages == null || slotImages.Length == 0)
+            {
+                Debug.LogWarning($"⚠️ Player {(playerIndex == 0 ? "A" : "B")} slotImages 배열이 비어있습니다! Inspector에서 연결하세요.");
+                return;
+            }
+
+            if (slotIndex >= 3 || slotIndex >= slotImages.Length)
+            {
+                Debug.LogWarning($"⚠️ Player {(playerIndex == 0 ? "A" : "B")} 슬롯이 가득 찼습니다!");
+                return;
+            }
+
+            // 슬롯 이미지 설정
+            Image slotImage = slotImages[slotIndex];
+            if (slotImage != null)
+            {
+                slotImage.sprite = champion.characterImage;
+                slotImage.enabled = true;
+                // 알파값을 255로 설정하여 이미지가 보이도록 함
+                slotImage.color = new Color(slotImage.color.r, slotImage.color.g, slotImage.color.b, 1f);
+                Debug.Log($"📌 Player {(playerIndex == 0 ? "A" : "B")} Slot {slotIndex}: {champion.championName} - 이미지 설정 완료!");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Player {(playerIndex == 0 ? "A" : "B")} Slot {slotIndex} Image가 null입니다! Inspector에서 연결하세요.");
+            }
         }
 
         /// <summary>
