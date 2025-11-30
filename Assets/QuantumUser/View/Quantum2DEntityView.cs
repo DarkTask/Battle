@@ -30,6 +30,9 @@ namespace QuantumUser
         private GameObject _projectilePrefab;
         private Vector3 _lastTargetPosition;
 
+        // HP 바
+        private HealthBarUI _healthBar;
+
         // 8방향 이름 배열 (각도 순서)
         private static readonly string[] Directions = {
             "East", "NorthEast", "North", "NorthWest",
@@ -52,7 +55,7 @@ namespace QuantumUser
                 Debug.Log($"🚫 AnimationController disabled");
             }
 
-            // TeamId 가져오기
+            // TeamId 가져오기 및 HP 바 생성
             if (frame.TryGet<BattleState>(EntityView.EntityRef, out var battleState))
             {
                 _teamId = battleState.TeamId;
@@ -65,6 +68,32 @@ namespace QuantumUser
                 {
                     StartCoroutine(InitializeAnimator());
                 }
+
+                // HP 바 생성 - ChampionStats에서 MaxHealth 가져오기
+                _healthBar = HealthBarUI.CreateHealthBar(transform);
+                float maxHealth = battleState.Health.AsFloat;  // 기본값은 현재 체력
+
+                // ChampionStats에서 실제 MaxHealth 가져오기
+                if (frame.TryGet<ChampionStats>(EntityView.EntityRef, out var championStats))
+                {
+                    maxHealth = championStats.MaxHealth.AsFloat;
+                    Debug.Log($"❤️ HealthBar: MaxHP from ChampionStats = {maxHealth}");
+                }
+
+                _healthBar.Initialize(transform, maxHealth, _teamId);
+                Debug.Log($"❤️ HealthBar created - MaxHP: {maxHealth}, CurrentHP: {battleState.Health.AsFloat}, Team: {_teamId}");
+
+                // HP 바 오브젝트 활성화 확인
+                if (_healthBar != null && _healthBar.gameObject != null)
+                {
+                    Debug.Log($"   HealthBar GameObject active: {_healthBar.gameObject.activeSelf}");
+                    Debug.Log($"   HealthBar localPosition: {_healthBar.transform.localPosition}");
+                    Debug.Log($"   HealthBar localScale: {_healthBar.transform.localScale}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ BattleState not found - TeamId and HealthBar not initialized!");
             }
 
             // 발사체 프리팹 가져오기 (PlayerController에서)
@@ -119,6 +148,20 @@ namespace QuantumUser
                 // 타겟 방향 계산 및 방향 업데이트
                 if (frame.TryGet<BattleState>(EntityView.EntityRef, out var battleState))
                 {
+                    // HP 바 업데이트
+                    if (_healthBar != null)
+                    {
+                        float currentHP = battleState.Health.AsFloat;
+
+                        // 공격받았는지 디버그 (매 프레임은 너무 많으므로 1초마다)
+                        if (Time.frameCount % 60 == 0)
+                        {
+                            _healthBar.DebugLogHP(currentHP);
+                        }
+
+                        _healthBar.SetHealth(currentHP);
+                    }
+
                     // 타겟이 있으면 타겟 방향으로, 없으면 기본 방향 유지
                     if (battleState.CurrentTarget != EntityRef.None &&
                         frame.TryGet<Transform3D>(battleState.CurrentTarget, out var targetTransform))
