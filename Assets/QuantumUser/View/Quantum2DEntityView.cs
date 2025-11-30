@@ -23,6 +23,13 @@ namespace QuantumUser
         private FPVector3 _lastPosition;
         private int _activeCoroutineCount = 0;
         private UnityEngine.Coroutine _currentResetCoroutine = null;
+        private string _currentDirection = "SouthEast";  // 현재 바라보는 방향
+
+        // 8방향 이름 배열 (각도 순서)
+        private static readonly string[] Directions = {
+            "East", "NorthEast", "North", "NorthWest",
+            "West", "SouthWest", "South", "SouthEast"
+        };
 
         public override void OnActivate(Frame frame)
         {
@@ -95,28 +102,84 @@ namespace QuantumUser
                 bool isMoving = FPVector3.Distance(quantumPos, _lastPosition) > FP._0_01;
                 _lastPosition = quantumPos;
 
-                // 달리기 애니메이션 제어
-                if (_animator != null)
+                // 타겟 방향 계산 및 방향 업데이트
+                if (frame.TryGet<BattleState>(EntityView.EntityRef, out var battleState))
                 {
-                    string direction = (_teamId == 0) ? "SouthEast" : "NorthWest";
-                    string moveParam = "Move" + direction;
+                    // 타겟이 있으면 타겟 방향으로, 없으면 기본 방향 유지
+                    if (battleState.CurrentTarget != EntityRef.None &&
+                        frame.TryGet<Transform3D>(battleState.CurrentTarget, out var targetTransform))
+                    {
+                        _currentDirection = GetDirectionTo(quantumPos, targetTransform.Position);
+                    }
+                    else if (_currentDirection == null)
+                    {
+                        // 초기 방향 (타겟 없을 때)
+                        _currentDirection = (_teamId == 0) ? "SouthEast" : "NorthWest";
+                    }
 
-                    _animator.SetBool(moveParam, isMoving);
-                    _animator.SetBool("isRunning", isMoving);
+                    // 방향 Bool 업데이트
+                    UpdateDirectionBools(_currentDirection);
+
+                    // 달리기 애니메이션 제어
+                    if (_animator != null)
+                    {
+                        string moveParam = "Move" + _currentDirection;
+                        _animator.SetBool(moveParam, isMoving);
+                        _animator.SetBool("isRunning", isMoving);
+                    }
+
+                    // 공격 애니메이션 체크
+                    if (_animator != null)
+                    {
+                        // AttackCooldown이 막 리셋되었을 때 = 공격이 방금 시작됨
+                        if (_lastAttackCooldown <= FP._0 && battleState.AttackCooldown > FP._0)
+                        {
+                            PlayAttackAnimation();
+                        }
+
+                        _lastAttackCooldown = battleState.AttackCooldown;
+                    }
                 }
             }
+        }
 
-            // 공격 애니메이션 체크
-            if (_animator != null && frame.TryGet<BattleState>(EntityView.EntityRef, out var battleState))
+        /// <summary>
+        /// 두 위치 사이의 방향을 8방향 문자열로 반환
+        /// </summary>
+        private string GetDirectionTo(FPVector3 from, FPVector3 to)
+        {
+            // Quantum XZ -> Unity XY 기준으로 방향 계산
+            float dx = (to.X - from.X).AsFloat;
+            float dy = (to.Z - from.Z).AsFloat;  // Quantum Z = Unity Y
+
+            // 각도 계산 (라디안 -> 도)
+            float angle = Mathf.Atan2(dy, dx) * Mathf.Rad2Deg;
+
+            // -180 ~ 180을 0 ~ 360으로 변환
+            if (angle < 0) angle += 360f;
+
+            // 8방향으로 양자화 (각 방향은 45도 범위)
+            // East = 0도, NorthEast = 45도, North = 90도, ...
+            int index = Mathf.RoundToInt(angle / 45f) % 8;
+
+            return Directions[index];
+        }
+
+        /// <summary>
+        /// 방향 Bool 파라미터 업데이트
+        /// </summary>
+        private void UpdateDirectionBools(string direction)
+        {
+            if (_animator == null) return;
+
+            // 모든 방향 초기화
+            foreach (var dir in Directions)
             {
-                // AttackCooldown이 막 리셋되었을 때 = 공격이 방금 시작됨
-                if (_lastAttackCooldown <= FP._0 && battleState.AttackCooldown > FP._0)
-                {
-                    PlayAttackAnimation();
-                }
-
-                _lastAttackCooldown = battleState.AttackCooldown;
+                _animator.SetBool("is" + dir, false);
             }
+
+            // 현재 방향만 활성화
+            _animator.SetBool("is" + direction, true);
         }
 
         private void PlayAttackAnimation()
@@ -134,16 +197,13 @@ namespace QuantumUser
                 _activeCoroutineCount--;
             }
 
-            // Team 0 (북서쪽 → 남동쪽): SouthEast
-            // Team 1 (남동쪽 → 북서쪽): NorthWest
-            string direction = (_teamId == 0) ? "SouthEast" : "NorthWest";
-            string isDirection = (_teamId == 0) ? "isSouthEast" : "isNorthWest";
-            string attackParam = "AttackAttack" + direction;
+            // 현재 바라보는 방향으로 공격 애니메이션 재생
+            string attackParam = "AttackAttack" + _currentDirection;
 
             _activeCoroutineCount++;
 
             // 코루틴으로 공격 애니메이션 재생
-            _currentResetCoroutine = StartCoroutine(PlayAttackAnimationCoroutine(isDirection, attackParam));
+            _currentResetCoroutine = StartCoroutine(PlayAttackAnimationCoroutine(attackParam));
         }
 
         private System.Collections.IEnumerator InitializeAnimator()
@@ -222,7 +282,7 @@ namespace QuantumUser
             }
         }
 
-        private System.Collections.IEnumerator PlayAttackAnimationCoroutine(string isDirection, string attackParam)
+        private System.Collections.IEnumerator PlayAttackAnimationCoroutine(string attackParam)
         {
             if (_animator == null) yield break;
 
@@ -233,8 +293,8 @@ namespace QuantumUser
             // 레이어 0에서 해당 상태를 0초(즉시)부터 재생, normalizedTime=0으로 처음부터 시작
             _animator.Play(stateName, 0, 0f);
 
-            // 1.5초 후 Idle로 전환 (또는 파라미터 리셋)
-            yield return new WaitForSeconds(1.5f);
+            // 0.5초 후 Idle로 전환 (공격 애니메이션이 짧으므로)
+            yield return new WaitForSeconds(0.5f);
 
             // Idle 상태로 전환하기 위해 공격 파라미터 리셋
             if (_animator != null)
