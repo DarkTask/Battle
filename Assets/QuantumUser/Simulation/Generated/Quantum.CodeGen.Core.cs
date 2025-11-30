@@ -561,7 +561,7 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct _globals_ {
-    public const Int32 SIZE = 832;
+    public const Int32 SIZE = 840;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
     public AssetRef<Map> Map;
@@ -590,20 +590,24 @@ namespace Quantum {
     public BitSet6 PlayerLastConnectionState;
     [FieldOffset(784)]
     public Int32 CurrentPhase;
-    [FieldOffset(800)]
+    [FieldOffset(804)]
     public Int32 SelectTurn;
-    [FieldOffset(824)]
+    [FieldOffset(832)]
     public FP SelectTimer;
     [FieldOffset(788)]
     public Int32 CurrentRound;
     [FieldOffset(808)]
     public FP BattleTimer;
-    [FieldOffset(792)]
-    public Int32 PlayerAScore;
     [FieldOffset(796)]
+    public Int32 PlayerAScore;
+    [FieldOffset(800)]
     public Int32 PlayerBScore;
     [FieldOffset(816)]
     public FP ResultTimer;
+    [FieldOffset(824)]
+    public FP RoundTransitionTimer;
+    [FieldOffset(792)]
+    public Int32 PendingNextRound;
     public readonly FixedArray<Input> input {
       get {
         fixed (byte* p = _input_) { return new FixedArray<Input>(p, 28, 6); }
@@ -632,6 +636,8 @@ namespace Quantum {
         hash = hash * 31 + PlayerAScore.GetHashCode();
         hash = hash * 31 + PlayerBScore.GetHashCode();
         hash = hash * 31 + ResultTimer.GetHashCode();
+        hash = hash * 31 + RoundTransitionTimer.GetHashCode();
+        hash = hash * 31 + PendingNextRound.GetHashCode();
         return hash;
       }
     }
@@ -651,11 +657,13 @@ namespace Quantum {
         Quantum.BitSet6.Serialize(&p->PlayerLastConnectionState, serializer);
         serializer.Stream.Serialize(&p->CurrentPhase);
         serializer.Stream.Serialize(&p->CurrentRound);
+        serializer.Stream.Serialize(&p->PendingNextRound);
         serializer.Stream.Serialize(&p->PlayerAScore);
         serializer.Stream.Serialize(&p->PlayerBScore);
         serializer.Stream.Serialize(&p->SelectTurn);
         FP.Serialize(&p->BattleTimer, serializer);
         FP.Serialize(&p->ResultTimer, serializer);
+        FP.Serialize(&p->RoundTransitionTimer, serializer);
         FP.Serialize(&p->SelectTimer, serializer);
     }
   }

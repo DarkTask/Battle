@@ -23,6 +23,32 @@ namespace Quantum
             if (globals->CurrentPhase != (int)GamePhaseSystem.Phase.Battle)
                 return;
 
+            // 라운드 전환 대기 중인 경우
+            if (globals->PendingNextRound > 0)
+            {
+                globals->RoundTransitionTimer -= f.DeltaTime;
+
+                if (globals->RoundTransitionTimer <= FP._0)
+                {
+                    int nextRound = globals->PendingNextRound;
+                    globals->PendingNextRound = 0;
+
+                    // 1.5초 대기 후 엔티티 제거
+                    DestroyAllBattleEntities(f);
+
+                    if (nextRound <= 4)
+                    {
+                        StartRound(f, nextRound);
+                    }
+                    else
+                    {
+                        // 게임 종료 처리
+                        EndGame(f, globals);
+                    }
+                }
+                return;  // 대기 중에는 전투 로직 실행 안 함
+            }
+
             // 전투 타이머 감소
             globals->BattleTimer -= f.DeltaTime;
 
@@ -74,23 +100,42 @@ namespace Quantum
             else if (winnerTeam == 1)
                 globals->PlayerBScore++;
 
-            // 모든 전투 엔티티 제거
-            DestroyAllBattleEntities(f);
+            // 승리 캐릭터가 보이도록 1.5초 대기 후 엔티티 제거 및 다음 라운드 시작
+            globals->RoundTransitionTimer = FP.FromFloat_UNSAFE(1.5f);
 
-            // 다음 라운드 또는 게임 종료
             if (round < 4)
             {
-                StartRound(f, round + 1);
+                globals->PendingNextRound = round + 1;
+                Log.Info($"⏳ 1.5초 후 Round {round + 1} 시작...");
             }
             else
             {
-                // 게임 종료
-                int finalWinner = globals->PlayerAScore > globals->PlayerBScore ? 0 : 1;
-                Log.Info($"🏆 Game Over! Final Winner: Team {finalWinner}");
-                f.Signals.OnBattleEnd(finalWinner);
-
-                GamePhaseSystem.ChangePhase(f, globals, GamePhaseSystem.Phase.Result);
+                // 게임 종료 예약 (5 = 게임 종료 신호)
+                globals->PendingNextRound = 5;
+                Log.Info($"⏳ 1.5초 후 게임 종료...");
             }
+        }
+
+        /// <summary>
+        /// 게임 종료 처리
+        /// </summary>
+        void EndGame(Frame f, _globals_* globals)
+        {
+            int finalWinner;
+            if (globals->PlayerAScore > globals->PlayerBScore)
+                finalWinner = 0;  // Team A 승리
+            else if (globals->PlayerBScore > globals->PlayerAScore)
+                finalWinner = 1;  // Team B 승리
+            else
+                finalWinner = -1; // 무승부
+
+            Log.Info($"🏆 Game Over! Final Winner: {(finalWinner == -1 ? "Draw" : $"Team {finalWinner}")} (Score: {globals->PlayerAScore} - {globals->PlayerBScore})");
+            f.Signals.OnBattleEnd(finalWinner);
+
+            // View 레이어로 결과 이벤트 전달
+            f.Events.BattleEndEvent(finalWinner, globals->PlayerAScore, globals->PlayerBScore);
+
+            GamePhaseSystem.ChangePhase(f, globals, GamePhaseSystem.Phase.Result);
         }
 
         /// <summary>

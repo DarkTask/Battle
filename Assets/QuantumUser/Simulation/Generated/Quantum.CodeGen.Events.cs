@@ -52,7 +52,7 @@ namespace Quantum {
   public unsafe partial class Frame {
     public unsafe partial struct FrameEvents {
       static partial void GetEventTypeCountCodeGen(ref Int32 eventCount) {
-        eventCount = 5;
+        eventCount = 6;
       }
       static partial void GetParentEventIDCodeGen(Int32 eventID, ref Int32 parentEventID) {
         switch (eventID) {
@@ -65,6 +65,7 @@ namespace Quantum {
           case EventPhaseChangedEvent.ID: result = typeof(EventPhaseChangedEvent); return;
           case EventTurnChangedEvent.ID: result = typeof(EventTurnChangedEvent); return;
           case EventChampionDeathEvent.ID: result = typeof(EventChampionDeathEvent); return;
+          case EventBattleEndEvent.ID: result = typeof(EventBattleEndEvent); return;
           default: break;
         }
       }
@@ -94,6 +95,14 @@ namespace Quantum {
         var ev = _f.Context.AcquireEvent<EventChampionDeathEvent>(EventChampionDeathEvent.ID);
         ev.Champion = Champion;
         ev.TeamId = TeamId;
+        _f.AddEvent(ev);
+        return ev;
+      }
+      public EventBattleEndEvent BattleEndEvent(Int32 WinnerTeam, Int32 PlayerAScore, Int32 PlayerBScore) {
+        var ev = _f.Context.AcquireEvent<EventBattleEndEvent>(EventBattleEndEvent.ID);
+        ev.WinnerTeam = WinnerTeam;
+        ev.PlayerAScore = PlayerAScore;
+        ev.PlayerBScore = PlayerBScore;
         _f.AddEvent(ev);
         return ev;
       }
@@ -205,6 +214,35 @@ namespace Quantum {
         var hash = 53;
         hash = hash * 31 + Champion.GetHashCode();
         hash = hash * 31 + TeamId.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventBattleEndEvent : EventBase {
+    public new const Int32 ID = 5;
+    public Int32 WinnerTeam;
+    public Int32 PlayerAScore;
+    public Int32 PlayerBScore;
+    protected EventBattleEndEvent(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventBattleEndEvent() : 
+        base(5, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 59;
+        hash = hash * 31 + WinnerTeam.GetHashCode();
+        hash = hash * 31 + PlayerAScore.GetHashCode();
+        hash = hash * 31 + PlayerBScore.GetHashCode();
         return hash;
       }
     }

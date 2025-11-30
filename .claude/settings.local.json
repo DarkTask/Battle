@@ -9,7 +9,8 @@
       "Bash(cp:*)",
       "Bash(uuidgen:*)",
       "Bash(find:*)",
-      "Bash(2)"
+      "Bash(2)",
+      "Bash(dir \"C:\\Git\\Battle\\Assets\\QuantumUser\\Resources\\Prefabs\" /s /b)"
     ],
     "deny": [],
     "ask": []

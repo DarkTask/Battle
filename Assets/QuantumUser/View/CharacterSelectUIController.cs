@@ -50,6 +50,11 @@ namespace QuantumUser
         [Tooltip("BattleOrderUI 인스턴스 또는 프리팹 (Resources/Prefabs/UI/BattleOrderUI)")]
         public BattleOrderUI battleOrderUI;
 
+        [Header("Result UI")]
+        public GameObject resultPanel;
+        public TextMeshProUGUI resultText;
+        public TextMeshProUGUI scoreText;
+
         [Header("Status")]
         public bool isInitialized = false;
 
@@ -76,6 +81,9 @@ namespace QuantumUser
 
         void Start()
         {
+            // Result UI 초기 비활성화
+            HideResultUI();
+
             // Quantum 준비될 때까지 대기
             StartCoroutine(WaitForQuantumAndInitialize());
         }
@@ -107,6 +115,7 @@ namespace QuantumUser
             QuantumEvent.Subscribe<EventChampionSelectedEvent>(this, OnChampionSelectedEvent);
             QuantumEvent.Subscribe<EventTurnChangedEvent>(this, OnTurnChangedEvent);
             QuantumEvent.Subscribe<EventPhaseChangedEvent>(this, OnPhaseChangedEvent);
+            QuantumEvent.Subscribe<EventBattleEndEvent>(this, OnBattleEndEvent);
 
             // Quantum Input Callback 등록
             QuantumCallback.Subscribe(this, (CallbackPollInput callback) => PollInput(callback));
@@ -222,6 +231,67 @@ namespace QuantumUser
         }
 
         /// <summary>
+        /// 전투 종료 이벤트 콜백
+        /// </summary>
+        void OnBattleEndEvent(EventBattleEndEvent e)
+        {
+            Debug.Log($"🏆 BattleEndEvent: Winner=Team{e.WinnerTeam}, Score={e.PlayerAScore}-{e.PlayerBScore}");
+
+            // 결과 UI 표시
+            ShowResultUI(e.WinnerTeam, e.PlayerAScore, e.PlayerBScore);
+        }
+
+        /// <summary>
+        /// 결과 UI 표시
+        /// </summary>
+        void ShowResultUI(int winnerTeam, int playerAScore, int playerBScore)
+        {
+            if (resultPanel == null)
+            {
+                Debug.LogWarning("⚠️ ResultPanel이 할당되지 않았습니다!");
+                return;
+            }
+
+            // 결과 패널 활성화
+            resultPanel.SetActive(true);
+
+            // 승자 텍스트 설정
+            if (resultText != null)
+            {
+                if (winnerTeam == -1)
+                {
+                    // 무승부
+                    resultText.text = "<color=#FFCC00>무승부!</color>";
+                }
+                else
+                {
+                    string winnerName = winnerTeam == 0 ? "Player A" : "Player B";
+                    string winnerColor = winnerTeam == 0 ? "#FF4444" : "#4444FF";
+                    resultText.text = $"<color={winnerColor}>{winnerName}</color> 승리!";
+                }
+            }
+
+            // 점수 텍스트 설정
+            if (scoreText != null)
+            {
+                scoreText.text = $"<color=#FF4444>A: {playerAScore}</color> - <color=#4444FF>B: {playerBScore}</color>";
+            }
+
+            Debug.Log($"🎉 결과 UI 표시됨: {(winnerTeam == -1 ? "무승부" : $"Team{winnerTeam} 승리")}!");
+        }
+
+        /// <summary>
+        /// 결과 UI 숨기기
+        /// </summary>
+        void HideResultUI()
+        {
+            if (resultPanel != null)
+            {
+                resultPanel.SetActive(false);
+            }
+        }
+
+        /// <summary>
         /// Phase 변경 이벤트 콜백
         /// </summary>
         void OnPhaseChangedEvent(EventPhaseChangedEvent e)
@@ -233,6 +303,7 @@ namespace QuantumUser
                 // 캐릭터 선택 화면으로 복귀 시 UI 초기화
                 ResetCharacterSelectUI();
                 characterSelectPanel?.SetActive(true);
+                HideResultUI();  // 결과 UI 숨기기
                 Debug.Log("🔄 CharacterSelect UI 복원됨");
             }
             else if (e.NewPhase == (int)GamePhaseSystem.Phase.OrderSetup)

@@ -23,6 +23,8 @@ global {
     Int32 PlayerAScore;
     Int32 PlayerBScore;
     FP ResultTimer;  // 결과 화면 타이머 (5초 후 재시작)
+    FP RoundTransitionTimer;  // 라운드 전환 대기 타이머 (1.5초)
+    Int32 PendingNextRound;   // 대기 중인 다음 라운드 번호 (0이면 대기 없음)
 }
 
 // ===== Components =====
@@ -99,4 +101,10 @@ event TurnChangedEvent {
 event ChampionDeathEvent {
     EntityRef Champion;
     Int32 TeamId;
+}
+
+event BattleEndEvent {
+    Int32 WinnerTeam;  // 0 = TeamA, 1 = TeamB
+    Int32 PlayerAScore;
+    Int32 PlayerBScore;
 }

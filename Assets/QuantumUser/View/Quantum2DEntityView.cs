@@ -25,6 +25,11 @@ namespace QuantumUser
         private UnityEngine.Coroutine _currentResetCoroutine = null;
         private string _currentDirection = "SouthEast";  // 현재 바라보는 방향
 
+        // 발사체 관련
+        private bool _isRanged = false;
+        private GameObject _projectilePrefab;
+        private Vector3 _lastTargetPosition;
+
         // 8방향 이름 배열 (각도 순서)
         private static readonly string[] Directions = {
             "East", "NorthEast", "North", "NorthWest",
@@ -60,6 +65,15 @@ namespace QuantumUser
                 {
                     StartCoroutine(InitializeAnimator());
                 }
+            }
+
+            // 발사체 프리팹 가져오기 (PlayerController에서)
+            var playerController = GetComponent<SmallScaleInc.TopDownPixelCharactersPack1.PlayerController>();
+            if (playerController != null && playerController.projectilePrefab != null)
+            {
+                _isRanged = true;
+                _projectilePrefab = playerController.projectilePrefab;
+                Debug.Log($"🏹 Ranged character detected - Projectile: {_projectilePrefab.name}");
             }
         }
 
@@ -110,6 +124,12 @@ namespace QuantumUser
                         frame.TryGet<Transform3D>(battleState.CurrentTarget, out var targetTransform))
                     {
                         _currentDirection = GetDirectionTo(quantumPos, targetTransform.Position);
+                        // 타겟 위치 저장 (Quantum XZ -> Unity XY)
+                        _lastTargetPosition = new Vector3(
+                            targetTransform.Position.X.AsFloat,
+                            targetTransform.Position.Z.AsFloat,
+                            0f
+                        );
                     }
                     else if (_currentDirection == null)
                     {
@@ -204,6 +224,41 @@ namespace QuantumUser
 
             // 코루틴으로 공격 애니메이션 재생
             _currentResetCoroutine = StartCoroutine(PlayAttackAnimationCoroutine(attackParam));
+
+            // 원거리 캐릭터인 경우 발사체 발사
+            if (_isRanged && _projectilePrefab != null)
+            {
+                StartCoroutine(FireProjectileDelayed());
+            }
+        }
+
+        /// <summary>
+        /// 딜레이 후 발사체 발사 (공격 애니메이션과 동기화)
+        /// </summary>
+        private System.Collections.IEnumerator FireProjectileDelayed()
+        {
+            // 공격 애니메이션 시작 후 0.2초 대기 (활시위 당기는 동작)
+            yield return new WaitForSeconds(0.2f);
+
+            if (_projectilePrefab == null) yield break;
+
+            // 발사 방향 계산
+            Vector3 direction = (_lastTargetPosition - transform.position).normalized;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            // 발사체 생성
+            GameObject projectile = Instantiate(_projectilePrefab, transform.position, Quaternion.Euler(0, 0, angle));
+
+            // Rigidbody2D로 이동
+            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                float projectileSpeed = 10f;
+                rb.linearVelocity = direction * projectileSpeed;
+            }
+
+            // 3초 후 자동 파괴
+            Destroy(projectile, 3f);
         }
 
         private System.Collections.IEnumerator InitializeAnimator()
