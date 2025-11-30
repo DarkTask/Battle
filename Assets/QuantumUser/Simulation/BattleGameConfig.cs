@@ -5,6 +5,19 @@ namespace Quantum
     using System;
 
     /// <summary>
+    /// 챔피언별 전투 스탯 (Quantum에서 사용)
+    /// </summary>
+    [Serializable]
+    public struct ChampionBattleStats
+    {
+        public FP MaxHealth;
+        public FP AttackPower;
+        public FP AttackRange;   // 근접: 0.6, 원거리: 2.0~3.0
+        public FP AttackSpeed;   // 초당 공격 횟수
+        public FP MoveSpeed;
+    }
+
+    /// <summary>
     /// 게임 전체 설정 (Quantum Asset)
     /// </summary>
     [Serializable]
@@ -19,6 +32,9 @@ namespace Quantum
         public FP SelectTimeLimit = FP._3;
         public FP BattleTimeLimit = FP.FromFloat_UNSAFE(60);
         public FPVector3[] SpawnPositions;
+
+        [Header("Champion Stats (Index = ChampionId)")]
+        public ChampionBattleStats[] ChampionStats;
 
         /// <summary>
         /// 챔피언 ID로 프로토타입 가져오기
@@ -45,6 +61,26 @@ namespace Quantum
                 return FPVector3.Zero;
             }
             return SpawnPositions[index];
+        }
+
+        /// <summary>
+        /// 챔피언 전투 스탯 가져오기
+        /// </summary>
+        public ChampionBattleStats GetChampionStats(int championId)
+        {
+            if (ChampionStats == null || championId < 0 || championId >= ChampionStats.Length)
+            {
+                // 기본값 반환
+                return new ChampionBattleStats
+                {
+                    MaxHealth = FP._10,
+                    AttackPower = FP._2,
+                    AttackRange = FP.FromFloat_UNSAFE(0.6f),
+                    AttackSpeed = FP._1,
+                    MoveSpeed = FP._2
+                };
+            }
+            return ChampionStats[championId];
         }
     }
 }

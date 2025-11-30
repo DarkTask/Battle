@@ -561,7 +561,7 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct _globals_ {
-    public const Int32 SIZE = 824;
+    public const Int32 SIZE = 832;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
     public AssetRef<Map> Map;
@@ -592,7 +592,7 @@ namespace Quantum {
     public Int32 CurrentPhase;
     [FieldOffset(800)]
     public Int32 SelectTurn;
-    [FieldOffset(816)]
+    [FieldOffset(824)]
     public FP SelectTimer;
     [FieldOffset(788)]
     public Int32 CurrentRound;
@@ -602,6 +602,8 @@ namespace Quantum {
     public Int32 PlayerAScore;
     [FieldOffset(796)]
     public Int32 PlayerBScore;
+    [FieldOffset(816)]
+    public FP ResultTimer;
     public readonly FixedArray<Input> input {
       get {
         fixed (byte* p = _input_) { return new FixedArray<Input>(p, 28, 6); }
@@ -629,6 +631,7 @@ namespace Quantum {
         hash = hash * 31 + BattleTimer.GetHashCode();
         hash = hash * 31 + PlayerAScore.GetHashCode();
         hash = hash * 31 + PlayerBScore.GetHashCode();
+        hash = hash * 31 + ResultTimer.GetHashCode();
         return hash;
       }
     }
@@ -652,6 +655,7 @@ namespace Quantum {
         serializer.Stream.Serialize(&p->PlayerBScore);
         serializer.Stream.Serialize(&p->SelectTurn);
         FP.Serialize(&p->BattleTimer, serializer);
+        FP.Serialize(&p->ResultTimer, serializer);
         FP.Serialize(&p->SelectTimer, serializer);
     }
   }

@@ -228,7 +228,14 @@ namespace QuantumUser
         {
             Debug.Log($"🎮 [CharacterSelectUI] PhaseChangedEvent: NewPhase={e.NewPhase}");
 
-            if (e.NewPhase == (int)GamePhaseSystem.Phase.OrderSetup)
+            if (e.NewPhase == (int)GamePhaseSystem.Phase.CharacterSelect)
+            {
+                // 캐릭터 선택 화면으로 복귀 시 UI 초기화
+                ResetCharacterSelectUI();
+                characterSelectPanel?.SetActive(true);
+                Debug.Log("🔄 CharacterSelect UI 복원됨");
+            }
+            else if (e.NewPhase == (int)GamePhaseSystem.Phase.OrderSetup)
             {
                 // CharacterSelect UI의 내부 컨텐츠만 숨기기 (Choose_Character 패널)
                 HideCharacterSelectContent();
@@ -243,6 +250,56 @@ namespace QuantumUser
             {
                 // Battle Phase로 전환 시 전체 UI 숨기기
                 characterSelectPanel?.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// 캐릭터 선택 UI 초기화 (재대결용)
+        /// </summary>
+        void ResetCharacterSelectUI()
+        {
+            // 선택 카운트 초기화
+            _playerASelectCount = 0;
+            _playerBSelectCount = 0;
+            _lastTurn = -1;
+
+            // 선택한 챔피언 ID 초기화
+            for (int i = 0; i < 3; i++)
+            {
+                _playerASelectedChampions[i] = -1;
+                _playerBSelectedChampions[i] = -1;
+            }
+
+            // 플레이어 슬롯 이미지 초기화
+            ResetPlayerSlots(playerASlotImages);
+            ResetPlayerSlots(playerBSlotImages);
+
+            // 캐릭터 카드 선택 상태 초기화
+            foreach (var element in characterElements)
+            {
+                if (element != null)
+                {
+                    element.ResetSelectedState();
+                }
+            }
+
+            Debug.Log("🔄 CharacterSelect UI 상태 초기화 완료");
+        }
+
+        /// <summary>
+        /// 플레이어 슬롯 이미지 초기화
+        /// </summary>
+        void ResetPlayerSlots(Image[] slotImages)
+        {
+            if (slotImages == null) return;
+
+            foreach (var slot in slotImages)
+            {
+                if (slot != null)
+                {
+                    slot.sprite = null;
+                    slot.color = new Color(1f, 1f, 1f, 0f);  // 투명하게
+                }
             }
         }
 

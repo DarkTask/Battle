@@ -22,6 +22,7 @@ global {
     FP BattleTimer;
     Int32 PlayerAScore;
     Int32 PlayerBScore;
+    FP ResultTimer;  // 결과 화면 타이머 (5초 후 재시작)
 }
 
 // ===== Components =====
@@ -93,4 +94,9 @@ event PhaseChangedEvent {
 event TurnChangedEvent {
     Int32 Turn;
     Int32 CurrentPlayer;  // 0 = PlayerA, 1 = PlayerB
+}
+
+event ChampionDeathEvent {
+    EntityRef Champion;
+    Int32 TeamId;
 }

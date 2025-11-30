@@ -89,8 +89,56 @@ namespace Quantum
 
         void UpdateResult(Frame f, _globals_* globals)
         {
-            // 결과 화면 표시
-            // 일정 시간 후 다시 CharacterSelect로 (재대결)
+            // 결과 화면 타이머 감소
+            globals->ResultTimer -= f.DeltaTime;
+
+            // 5초 후 캐릭터 선택 화면으로 복귀
+            if (globals->ResultTimer <= FP._0)
+            {
+                Log.Info("🔄 Restarting game - returning to Character Select");
+                ResetGameState(f, globals);
+                ChangePhase(f, globals, Phase.CharacterSelect);
+            }
+        }
+
+        /// <summary>
+        /// 게임 상태 초기화 (재대결용)
+        /// </summary>
+        void ResetGameState(Frame f, _globals_* globals)
+        {
+            // 글로벌 상태 초기화
+            globals->SelectTurn = 0;
+            globals->SelectTimer = FP._0;
+            globals->CurrentRound = 0;
+            globals->BattleTimer = FP._0;
+            globals->PlayerAScore = 0;
+            globals->PlayerBScore = 0;
+            globals->ResultTimer = FP._0;
+
+            // 모든 PlayerGameData 초기화
+            var filter = f.Filter<PlayerGameData>();
+            while (filter.NextUnsafe(out var entity, out var data))
+            {
+                // 선택한 챔피언 목록 클리어
+                var selectedList = f.ResolveList(data->SelectedChampions);
+                selectedList.Clear();
+                data->SelectedCount = 0;
+
+                // 전투 순서 클리어
+                var battleOrder = f.ResolveList(data->BattleOrder);
+                battleOrder.Clear();
+                data->OrderSubmitted = false;
+
+                Log.Info($"🔄 Reset PlayerGameData for Player {data->PlayerRef}");
+            }
+
+            // 전투 엔티티 제거 (챔피언들)
+            var battleFilter = f.Filter<BattleState>();
+            while (battleFilter.NextUnsafe(out var entity, out var state))
+            {
+                f.Destroy(entity);
+                Log.Info($"🗑️ Destroyed battle entity {entity}");
+            }
         }
 
         /// <summary>
@@ -161,7 +209,9 @@ namespace Quantum
                     break;
 
                 case Phase.Result:
-                    // 최종 결과
+                    // 5초 후 캐릭터 선택 화면으로 복귀
+                    globals->ResultTimer = FP.FromFloat_UNSAFE(5f);
+                    Log.Info("⏱️ Result screen - returning to Character Select in 5 seconds");
                     break;
             }
         }

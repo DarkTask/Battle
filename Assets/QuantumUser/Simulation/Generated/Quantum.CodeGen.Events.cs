@@ -52,7 +52,7 @@ namespace Quantum {
   public unsafe partial class Frame {
     public unsafe partial struct FrameEvents {
       static partial void GetEventTypeCountCodeGen(ref Int32 eventCount) {
-        eventCount = 4;
+        eventCount = 5;
       }
       static partial void GetParentEventIDCodeGen(Int32 eventID, ref Int32 parentEventID) {
         switch (eventID) {
@@ -64,6 +64,7 @@ namespace Quantum {
           case EventChampionSelectedEvent.ID: result = typeof(EventChampionSelectedEvent); return;
           case EventPhaseChangedEvent.ID: result = typeof(EventPhaseChangedEvent); return;
           case EventTurnChangedEvent.ID: result = typeof(EventTurnChangedEvent); return;
+          case EventChampionDeathEvent.ID: result = typeof(EventChampionDeathEvent); return;
           default: break;
         }
       }
@@ -86,6 +87,13 @@ namespace Quantum {
         var ev = _f.Context.AcquireEvent<EventTurnChangedEvent>(EventTurnChangedEvent.ID);
         ev.Turn = Turn;
         ev.CurrentPlayer = CurrentPlayer;
+        _f.AddEvent(ev);
+        return ev;
+      }
+      public EventChampionDeathEvent ChampionDeathEvent(EntityRef Champion, Int32 TeamId) {
+        var ev = _f.Context.AcquireEvent<EventChampionDeathEvent>(EventChampionDeathEvent.ID);
+        ev.Champion = Champion;
+        ev.TeamId = TeamId;
         _f.AddEvent(ev);
         return ev;
       }
@@ -170,6 +178,33 @@ namespace Quantum {
         var hash = 47;
         hash = hash * 31 + Turn.GetHashCode();
         hash = hash * 31 + CurrentPlayer.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventChampionDeathEvent : EventBase {
+    public new const Int32 ID = 4;
+    public EntityRef Champion;
+    public Int32 TeamId;
+    protected EventChampionDeathEvent(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventChampionDeathEvent() : 
+        base(4, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 53;
+        hash = hash * 31 + Champion.GetHashCode();
+        hash = hash * 31 + TeamId.GetHashCode();
         return hash;
       }
     }

@@ -23,6 +23,8 @@ MonoBehaviour:
     constitution: 14
     maxHealth: 120
     attackPower: 12
+    attackRange: 0.6
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 1
@@ -35,6 +37,8 @@ MonoBehaviour:
     constitution: 8
     maxHealth: 80
     attackPower: 14
+    attackRange: 3
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 2
@@ -47,6 +51,8 @@ MonoBehaviour:
     constitution: 8
     maxHealth: 70
     attackPower: 16
+    attackRange: 3
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 3
@@ -59,6 +65,8 @@ MonoBehaviour:
     constitution: 16
     maxHealth: 140
     attackPower: 10
+    attackRange: 0.6
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 4
@@ -71,6 +79,8 @@ MonoBehaviour:
     constitution: 6
     maxHealth: 70
     attackPower: 15
+    attackRange: 3
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 5
@@ -83,6 +93,8 @@ MonoBehaviour:
     constitution: 6
     maxHealth: 60
     attackPower: 18
+    attackRange: 3
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 6
@@ -95,6 +107,8 @@ MonoBehaviour:
     constitution: 12
     maxHealth: 110
     attackPower: 14
+    attackRange: 0.6
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1
   - id: 7
@@ -107,5 +121,7 @@ MonoBehaviour:
     constitution: 14
     maxHealth: 130
     attackPower: 16
+    attackRange: 3
+    attackSpeed: 1
     moveSpeed: 2
     isAlive: 1

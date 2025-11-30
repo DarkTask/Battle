@@ -161,4 +161,24 @@ public class CharacterElement : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 선택 상태 초기화 (재대결용)
+    /// </summary>
+    public void ResetSelectedState()
+    {
+        // 색상 원래대로 복원
+        if (image != null)
+        {
+            image.color = Color.white;
+        }
+
+        // 버튼 활성화
+        if (button != null)
+        {
+            button.interactable = true;
+        }
+
+        Debug.Log($"🔄 CharacterElement[{index}] 상태 초기화");
+    }
 }

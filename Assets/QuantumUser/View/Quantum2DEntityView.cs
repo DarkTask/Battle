@@ -65,6 +65,21 @@ namespace QuantumUser
             if (frame == null)
                 return;
 
+            // 사망 체크 - 죽은 캐릭터는 비활성화
+            if (frame.TryGet<BattleState>(EntityView.EntityRef, out var deathCheck))
+            {
+                if (!deathCheck.IsAlive)
+                {
+                    // 이미 비활성화되어 있으면 스킵
+                    if (gameObject.activeSelf)
+                    {
+                        Debug.Log($"💀 Entity {EntityView.EntityRef} died - deactivating view");
+                        gameObject.SetActive(false);
+                    }
+                    return;
+                }
+            }
+
             // Transform3D 가져오기 (safe 방식)
             if (frame.TryGet<Transform3D>(EntityView.EntityRef, out var quantumTransform))
             {

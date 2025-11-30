@@ -183,6 +183,9 @@ namespace Quantum
 
                 f.Signals.OnChampionDeath(target);
 
+                // View 레이어로 사망 이벤트 전달
+                f.Events.ChampionDeathEvent(target, targetState->TeamId);
+
                 if (f.Unsafe.TryGetPointer<BattleState>(attacker, out var attackerState))
                 {
                     attackerState->CurrentTarget = EntityRef.None;

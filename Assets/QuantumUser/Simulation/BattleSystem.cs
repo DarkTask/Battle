@@ -216,6 +216,9 @@ namespace Quantum
                 transform->Rotation = FPQuaternion.Identity;
             }
 
+            // 챔피언별 스탯 가져오기
+            var championBattleStats = config.GetChampionStats(championId);
+
             // ChampionStats 컴포넌트 추가 및 설정
             f.Add<ChampionStats>(entity);
             ChampionStats* stats = f.Unsafe.GetPointer<ChampionStats>(entity);
@@ -223,10 +226,10 @@ namespace Quantum
             stats->Strength = FP._1;
             stats->Dexterity = FP._1;
             stats->Constitution = FP._1;
-            stats->MaxHealth = FP._10;  // 임시값: 10 HP
-            stats->AttackPower = FP._2;  // 2 데미지
-            stats->AttackSpeed = FP._1;  // 1초당 1회 공격
-            stats->MoveSpeed = FP._2;    // 이동속도 2 (ChampionDatabase와 일치)
+            stats->MaxHealth = championBattleStats.MaxHealth;
+            stats->AttackPower = championBattleStats.AttackPower;
+            stats->AttackSpeed = championBattleStats.AttackSpeed;
+            stats->MoveSpeed = championBattleStats.MoveSpeed;
 
             // BattleState 컴포넌트 추가 및 설정
             f.Add<BattleState>(entity);
@@ -238,11 +241,11 @@ namespace Quantum
             battleState->CurrentTarget = EntityRef.None;
             battleState->Health = stats->MaxHealth;
 
-            // SimpleAI 컴포넌트 추가
+            // SimpleAI 컴포넌트 추가 (챔피언별 공격 범위 적용)
             f.Add<SimpleAI>(entity);
             SimpleAI* ai = f.Unsafe.GetPointer<SimpleAI>(entity);
             ai->SearchRadius = FP.FromFloat_UNSAFE(20);  // 20 유닛 반경 내 적 탐색
-            ai->AttackRange = FP.FromFloat_UNSAFE(0.6f);    // 0.6 유닛 거리에서 공격
+            ai->AttackRange = championBattleStats.AttackRange;  // 챔피언별 공격 범위
             ai->ThinkTimer = FP._0;
 
             // NavMeshSteeringAgent 설정 (이동 속도)
@@ -258,8 +261,8 @@ namespace Quantum
             bool hasTransform = f.Has<Transform3D>(entity);
             bool hasPathfinder = f.Has<NavMeshPathfinder>(entity);
 
-            Log.Info($"✅ Champion spawned: ChampionId={championId}, Team={teamId}, Slot={slotIndex}, Entity={entity}, Health={battleState->Health}");
-            Log.Info($"   Components: SimpleAI={hasSimpleAI}, BattleState={hasBattleState}, Transform3D={hasTransform}, NavMeshPathfinder={hasPathfinder}");
+            Log.Info($"✅ Champion spawned: ChampionId={championId}, Team={teamId}, Slot={slotIndex}, Entity={entity}");
+            Log.Info($"   Stats: HP={battleState->Health}, ATK={stats->AttackPower}, Range={ai->AttackRange}, Speed={stats->MoveSpeed}");
         }
 
         /// <summary>

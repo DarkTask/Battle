@@ -16,15 +16,6 @@ namespace Quantum
             if (globals->CurrentPhase != (int)GamePhaseSystem.Phase.CharacterSelect)
                 return;
 
-            // 타이머 감소
-            globals->SelectTimer -= f.DeltaTime;
-
-            // 타이머 종료 시 자동 선택
-            if (globals->SelectTimer <= FP._0)
-            {
-                AutoSelectChampion(f, globals);
-            }
-
             // 6턴 완료 시 다음 페이즈로
             if (globals->SelectTurn > 6)
             {

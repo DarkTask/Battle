@@ -44608,6 +44608,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5611377469687973658}
   - {fileID: 4200030001606894491}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -44752,7 +44753,7 @@ MonoBehaviour:
   - {fileID: 2119700008656090382}
   turnText: {fileID: 2177387378639031859}
   timerText: {fileID: 0}
-  battleOrderUI: {fileID: 0}
+  battleOrderUI: {fileID: 8295355976914571830}
   isInitialized: 0
 --- !u!1 &8240609816165061090
 GameObject:
@@ -50906,3 +50907,149 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd867894ac5f084583926f54133ad47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterElement
+--- !u!1001 &8098169991052838403
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4389155799478167945}
+    m_Modifications:
+    - target: {fileID: 2621886274678361438, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3378345744083086787, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_Name
+      value: BattleOrderUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8112990879927137150, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2e85b9b167020dc4fa93cffea0c18acc, type: 3}
+--- !u!224 &5611377469687973658 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4448963414467739929, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+    type: 3}
+  m_PrefabInstance: {fileID: 8098169991052838403}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8295355976914571830 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 251494576479982645, guid: 2e85b9b167020dc4fa93cffea0c18acc,
+    type: 3}
+  m_PrefabInstance: {fileID: 8098169991052838403}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cb40d0d0b231b14b9ba9f97bdf2e293, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleOrderUI
